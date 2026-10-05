@@ -1096,15 +1096,30 @@ let dataLoaded = false;
 // 从云端拉数据
 async function loadFromCloud() {
   try {
-    const { data: rows, error } = await supabaseClient
-      .from("kv_store")
-      .select("value")
-      .eq("key", CLOUD_KEY)
-      .maybeSingle();
-    if (error) throw error;
-    if (rows && rows.value) {
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("超时")), 8000)
+    );
+    // 用原生 fetch + no-store 防缓存
+    const queryPromise = fetch(
+      SUPABASE_URL + "/rest/v1/kv_store?key=eq." + CLOUD_KEY + "&select=value",
+      {
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + SUPABASE_KEY,
+          "Cache-Control": "no-cache"
+        },
+        cache: "no-store"
+      }
+    ).then(r => r.json()).then(rows => {
+      if (rows && rows.length > 0) return { data: rows[0], error: null };
+      return { data: null, error: null };
+    });
+
+    const result = await Promise.race([queryPromise, timeoutPromise]);
+    if (result.error) throw result.error;
+    if (result.data && result.data.value) {
       dataLoaded = true;
-      return rows.value;
+      return result.data.value;
     } else {
       dataLoaded = true;
       return null;
@@ -1115,7 +1130,6 @@ async function loadFromCloud() {
     return null;
   }
 }
-
 // 保存数据到云端
 async function saveToCloud(payload) {
   try {
@@ -1997,7 +2011,7 @@ function renderDevTab() {
       <button class="primary" onclick="devCreateSpaceAndAccount()">创建</button>
     </div>
     <div class="dev-section">
-      3. 所有空间<div class="dev-title" style="font-weight:600;margin-bottom:12px">3. 所有空间</div>
+    <div class="dev-title" style="font-weight:600;margin-bottom:12px">3. 所有空间</div>
 <table class="data-table">
   <thead><tr><th>空间</th><th>图标</th><th>主人</th><th>文件夹</th><th>文件</th><th>操作</th></tr></thead>
   <tbody>
