@@ -1099,14 +1099,12 @@ async function loadFromCloud() {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("超时")), 8000)
     );
-    // 用原生 fetch + no-store 防缓存
     const queryPromise = fetch(
       SUPABASE_URL + "/rest/v1/kv_store?key=eq." + CLOUD_KEY + "&select=value",
       {
         headers: {
           "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY,
-          "Cache-Control": "no-cache"
+          "Authorization": "Bearer " + SUPABASE_KEY
         },
         cache: "no-store"
       }
