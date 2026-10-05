@@ -1997,19 +1997,26 @@ function renderDevTab() {
       <button class="primary" onclick="devCreateSpaceAndAccount()">创建</button>
     </div>
     <div class="dev-section">
-      <div class="dev-title" style="font-weight:600;margin-bottom:12px">3. 所有空间</div>
-      <table class="data-table">
-        <thead><tr><th>空间</th><th>图标</th><th>主人</th><th>文件夹</th><th>文件</th></tr></thead>
-        <tbody>
-          ${Object.keys(data.spaces).map(sid => {
-            const sp = data.spaces[sid];
-            const owner = Object.keys(data.accounts).find(u => data.accounts[u].owns === sid) || "—";
-            const fCount = (sp.folders||[]).filter(f=>!f.deleted).length;
-            const fileCount = (sp.files||[]).filter(f=>!f.deleted).length;
-            return `<tr><td>${esc(sp.name)}</td><td>${sp.icon}</td><td>${esc(owner)}</td><td>${fCount}</td><td>${fileCount}</td></tr>`;
-          }).join("")}
-        </tbody>
-      </table>
+      3. 所有空间<div class="dev-title" style="font-weight:600;margin-bottom:12px">3. 所有空间</div>
+<table class="data-table">
+  <thead><tr><th>空间</th><th>图标</th><th>主人</th><th>文件夹</th><th>文件</th><th>操作</th></tr></thead>
+  <tbody>
+    ${Object.keys(data.spaces).map(sid => {
+      const sp = data.spaces[sid];
+      const owner = Object.keys(data.accounts).find(u => data.accounts[u].owns === sid) || "—";
+      const fCount = (sp.folders||[]).filter(f=>!f.deleted).length;
+      const fileCount = (sp.files||[]).filter(f=>!f.deleted).length;
+      return `<tr>
+        <td>${esc(sp.name)}</td>
+        <td>${sp.icon}</td>
+        <td>${esc(owner)}</td>
+        <td>${fCount}</td>
+        <td>${fileCount}</td>
+        <td><button class="mini" onclick="devDeleteSpace('${sid}')">删除</button></td>
+      </tr>`;
+    }).join("")}
+  </tbody>
+</table>
     </div>
     <div class="dev-section">
       <div class="dev-title" style="font-weight:600;margin-bottom:12px">4. 所有账号</div>
@@ -2103,6 +2110,38 @@ function devDeleteAccount(user) {
   if (!confirm(`确定删除账号 ${user}？`)) return;
   delete data.accounts[user];
   save(); alert("已删除"); render();
+}
+function devDeleteSpace(spaceId) {
+  const sp = data.spaces[spaceId];
+  if (!sp) return;
+  const owner = Object.keys(data.accounts).find(u => data.accounts[u].owns === spaceId);
+  const ownerText = owner ? `主人账号 ${owner}` : "（无主人账号）";
+
+ if (!confirm(`确定删除空间「${sp.name}」？\n\n将一起删除：\n- 空间内所有文件夹、文件、留言、通知、日历\n- ${ownerText}\n\n此操作不可撤销。`)) return;
+  const input = prompt(`请再次确认，输入 DELETE 以删除空间「${sp.name}」：`);
+  if (input !== "DELETE") {
+    alert("已取消");
+    return;
+  }
+
+  // 删除空间
+  delete data.spaces[spaceId];
+
+  // 删除主人账号（如果存在）
+  if (owner) {
+    delete data.accounts[owner];
+  }
+
+  // 如果当前正在浏览这个空间，退出
+  if (currentSpace === spaceId) {
+    currentSpace = null;
+    currentFolderId = null;
+    currentFileId = null;
+  }
+
+  save();
+  alert(`已删除空间「${sp.name}」`);
+  render();
 }
 function devBroadcast() {
   const text = document.getElementById("devBroadcastText").value.trim();
