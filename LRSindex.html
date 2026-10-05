@@ -1,0 +1,3421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucent · Rain · Surge</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #236D74;
+    color: #22322A;
+    line-height: 1.9;
+    min-height: 100vh;
+  }
+  h1, h2, h3, h4 { font-family: "仿宋", FangSong, "宋体", SimSun, "STSong", serif; }
+
+  /* 全局 SVG 大小约束 */
+  svg { width: 1em; height: 1em; vertical-align: -0.15em; }
+  button svg { width: 14px; height: 14px; vertical-align: -2px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(255,255,255,.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(213,250,241,.25);
+    padding: 14px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 {
+    font-size: 16px; margin: 0; font-weight: normal;
+    letter-spacing: 2px;
+    color: #C5FCE0;
+  }
+  .user { font-size: 14px; color: #C5FCE0; display: flex; gap: 10px; align-items: center; }
+  .user span { opacity: .9; }
+
+  button {
+    font-family: inherit; cursor: pointer;
+    border: 1px solid rgba(213,250,241,.35);
+    background: rgba(255,255,255,.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #C5FCE0;
+    padding: 6px 14px; border-radius: 10px; font-size: 13px;
+    transition: .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:hover { background: rgba(255,255,255,.2); border-color: rgba(213,250,241,.6); }
+  button.primary { background: rgba(255,255,255,.18); border-color: rgba(213,250,241,.5); color: #C5FCE0; }
+  button.primary:hover { background: rgba(255,255,255,.28); }
+  button.danger { color: #FFCDD2; border-color: rgba(255,205,210,.4); }
+  button.danger:hover { background: rgba(211,47,47,.3); border-color: rgba(211,47,47,.6); }
+  button.mini { padding: 3px 10px; font-size: 12px; }
+
+  main { max-width: 1000px; margin: 0 auto; padding: 40px 24px 100px; }
+
+  .hero { text-align: center; padding: 60px 0 40px; }
+  .hero h2 {
+    font-size: 32px; font-weight: normal;
+    margin: 0 0 20px;
+    letter-spacing: 4px;
+    color: #C5FCE0;
+  }
+  .hero p {
+    color: #22322A; opacity: .8;
+    margin: 0 auto; font-size: 14px;
+    line-height: 2.2;
+    max-width: 500px;
+  }
+
+  .spaces {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px; margin-top: 40px;
+  }
+  .space-card {
+    background: rgba(255,255,255,.16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.4);
+    border-radius: 18px;
+    padding: 28px 18px; text-align: center; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    transition: .25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .space-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.14);
+    background: rgba(255,255,255,.22);
+  }
+  .space-card .icon { font-size: 36px; margin-bottom: 12px; }
+  .space-card .name { font-weight: 600; font-size: 15px; letter-spacing: 1px; }
+  .space-card .role { font-size: 12px; opacity: .6; margin-top: 6px; letter-spacing: 1px; }
+
+  .space-header {
+    background: rgba(255,255,255,.16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.35);
+    border-radius: 18px;
+    padding: 24px 28px; margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  }
+  .space-header .title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .space-header h2 { margin: 0 0 8px; font-size: 22px; font-weight: normal; letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
+  .mode-badge {
+    display: inline-block; font-size: 12px; padding: 3px 12px; border-radius: 20px;
+    background: rgba(255,255,255,.25); color: #22322A; letter-spacing: 1px;
+    border: 1px solid rgba(213,250,241,.3);
+  }
+  .breadcrumb {
+    margin-top: 12px; font-size: 13px; opacity: .7;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .breadcrumb a { color: #22322A; cursor: pointer; text-decoration: none; border-bottom: 1px dashed transparent; opacity: .9; }
+  .breadcrumb a:hover { border-bottom-color: #22322A; }
+  .breadcrumb .sep { opacity: .4; }
+
+  /* 日历 */
+  .calendar-module {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.3);
+    border-radius: 14px;
+    padding: 12px 18px; margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  }
+  .cal-collapsed { display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; gap: 12px; }
+  .cal-collapsed .cal-left {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; letter-spacing: 1px;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .cal-collapsed .cal-left svg { flex-shrink: 0; }
+  .cal-collapsed .cal-toggle { font-size: 12px; opacity: .6; flex-shrink: 0; }
+  .calendar-module.expanded .cal-collapsed { margin-bottom: 12px; }
+  .cal-body { display: none; }
+  .calendar-module.expanded .cal-body { display: block; }
+  .cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+  .cal-title { font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .cal-nav { display: flex; gap: 6px; align-items: center; }
+  .cal-nav button { padding: 3px 10px; font-size: 12px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-dow { text-align: center; font-size: 11px; opacity: .6; padding: 4px 0; font-weight: 600; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border-radius: 8px; font-size: 12px; cursor: pointer; transition: .15s;
+    position: relative; background: rgba(255,255,255,.08);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cal-day.other-month { opacity: .15; background: transparent; cursor: default; }
+  .cal-day:not(.other-month):hover { background: rgba(255,255,255,.2); }
+  .cal-day.today { background: rgba(197,252,224,.35); font-weight: 700; }
+  .cal-day .dot { position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: #C5FCE0; }
+
+  .filters {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.3);
+    border-radius: 14px;
+    padding: 14px; margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .filters input[type="text"] {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid rgba(213,250,241,.35);
+    background: rgba(255,255,255,.1);
+    border-radius: 10px;
+    font-family: inherit; font-size: 14px; color: #22322A;
+  }
+  .filters input[type="text"]::placeholder { color: #22322A; opacity: .5; }
+  .filters input[type="text"]:focus { outline: none; border-color: rgba(197,252,224,.7); background: rgba(255,255,255,.18); }
+  .filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; font-size: 13px; opacity: .8; }
+  .filter-row select, .filter-row input[type="date"] {
+    padding: 6px 10px; border: 1px solid rgba(213,250,241,.35);
+    background: rgba(255,255,255,.1); color: #22322A;
+    border-radius: 8px; font-family: inherit; font-size: 13px;
+  }
+
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    background: rgba(255,255,255,.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.3);
+    padding: 5px; border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    flex-wrap: wrap;
+  }
+  .tab {
+    flex: 1; text-align: center; padding: 10px; border-radius: 10px;
+    cursor: pointer; font-size: 14px; opacity: .75;
+    transition: .2s; user-select: none;
+    min-width: 90px; letter-spacing: 1px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab:hover { background: rgba(255,255,255,.12); opacity: 1; }
+  .tab.active { background: rgba(255,255,255,.28); opacity: 1; font-weight: 600; }
+  .tab .badge-count {
+    display: inline-block; background: rgba(197,252,224,.8); color: #22322A;
+    font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px;
+  }
+
+  .subtabs {
+    display: flex; gap: 4px; margin-bottom: 16px;
+    padding: 4px; border-radius: 10px;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(213,250,241,.25);
+    align-items: center;
+  }
+  .subtab {
+    flex: 1; text-align: center; padding: 8px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; opacity: .7;
+    transition: .2s; user-select: none;
+  }
+  .subtab:hover { background: rgba(255,255,255,.1); opacity: 1; }
+  .subtab.active { background: rgba(255,255,255,.22); opacity: 1; font-weight: 600; }
+  .subtab-actions { padding: 0 8px; display: flex; align-items: center; }
+  .bingo-btn {
+    background: rgba(255,233,128,.6); color: #3F3B2B;
+    border: 1px solid rgba(255,233,128,.8);
+    padding: 6px 16px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    letter-spacing: 1px; transition: .2s;
+  }
+  .bingo-btn:hover { background: rgba(255,233,128,.85); }
+  .bingo-btn:disabled { background: rgba(255,255,255,.1); color: #22322A; opacity: .4; cursor: not-allowed; border-color: rgba(213,250,241,.2); }
+
+  .desktop { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+
+  .folder, .file-card {
+    background: rgba(255,255,255,.16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.4);
+    border-radius: 16px;
+    padding: 18px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    transition: .25s; position: relative;
+    -webkit-tap-highlight-color: transparent;
+    color: #22322A;
+  }
+  .folder:hover, .file-card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,.14);
+    transform: translateY(-3px);
+    background: rgba(255,255,255,.24);
+  }
+  .folder.warm, .file-card.warm { background: rgba(255,233,128,.28); border-color: #FDFBDA; color: #3F3B2B; }
+  .folder.warm:hover, .file-card.warm:hover { background: rgba(255,233,128,.42); }
+  .folder.cool, .file-card.cool { background: rgba(136,226,209,.24); border-color: #D5FAF1; color: #293D52; }
+  .folder.cool:hover, .file-card.cool:hover { background: rgba(136,226,209,.38); }
+
+  .folder .fname {
+    font-weight: 600; font-size: 14px; margin-bottom: 8px; padding-right: 30px;
+    word-break: break-all; letter-spacing: .5px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .folder .fname svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .folder .fmeta { font-size: 12px; opacity: .7; line-height: 1.7; }
+  .folder .edit-btn {
+    position: absolute; top: 14px; right: 14px;
+    width: 28px; height: 28px; padding: 0;
+    border-radius: 8px; font-size: 13px;
+    opacity: 0; transition: .2s;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.3); border-color: transparent; color: inherit;
+  }
+  .folder:hover .edit-btn { opacity: 1; }
+  .folder .edit-btn:hover { background: rgba(255,255,255,.5); color: inherit; }
+
+  .file-card { display: flex; flex-direction: column; min-height: 160px; }
+  .file-card img { width: 100%; border-radius: 10px; display: block; margin-bottom: 10px; height: 120px; object-fit: cover; }
+  .file-card .ftitle {
+    font-weight: 600; font-size: 14px; margin-bottom: 6px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: .5px;
+  }
+  .file-card .text {
+    white-space: pre-wrap; font-size: 13px; opacity: .8;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden; flex: 1;
+  }
+  .file-card .letter-snippet {
+    padding: 10px; border-radius: 10px; font-size: 13px; line-height: 1.7;
+    max-height: 90px; overflow: hidden; white-space: pre-wrap;
+    border: 1px solid rgba(255,255,255,.3);
+    font-family: "仿宋", FangSong, "宋体", SimSun, serif;
+  }
+  .file-card .meta { font-size: 11px; opacity: .7; margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .file-card .mine-tag {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 10px; color: #293D52; background: rgba(197,252,224,.6);
+    padding: 2px 8px; border-radius: 20px; letter-spacing: 1px;
+  }
+  .file-card .folder-tag {
+    font-size: 11px; background: rgba(255,255,255,.25); padding: 2px 8px;
+    border-radius: 20px; display: inline-block; margin-top: 6px; word-break: break-all;
+  }
+  .file-card .img-count-badge {
+    position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,.4); color: #fff;
+    font-size: 11px; padding: 2px 7px; border-radius: 10px;
+  }
+
+  .vis-badge { font-size: 10px; padding: 2px 8px; border-radius: 12px; font-weight: 500; color: #fff; letter-spacing: .5px; display: inline-block; }
+  .vis-public   { background: #7F85D3; }
+  .vis-password { background: #B556C7; }
+  .vis-ours     { background: #89E1AD; color: #293D52; }
+  .vis-private  { background: #FEE673; color: #3F3B2B; }
+
+  .detail-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 8px; }
+  .mini-back-btn { padding: 6px 14px; font-size: 12px; border-radius: 10px; min-height: auto; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; }
+  .mini-back-btn svg { width: 16px; height: 16px; }
+  .detail-topbar-actions { display: flex; gap: 6px; }
+
+  .reader-split { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 20px; }
+  .reader-left { flex: 0 0 60%; max-width: 60%; }
+  .reader-right { flex: 1; padding: 20px 0; }
+  .reader-title { font-size: 24px; font-weight: normal; margin: 0 0 10px; line-height: 1.5; letter-spacing: 2px; }
+  .reader-meta { font-size: 12px; opacity: .7; margin-bottom: 24px; letter-spacing: 1px; }
+  .reader-text { font-size: 15px; line-height: 2; white-space: pre-wrap; letter-spacing: .5px; }
+
+  .book-area { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 12px 0; position: relative; }
+  .book-page-wrap { width: 100%; max-width: 300px; aspect-ratio: 3/4; position: relative; }
+  @media (min-width: 768px) { .book-page-wrap { width: 300px; height: 400px; aspect-ratio: auto; } }
+  .book-page {
+    width: 100%; height: 100%; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 6px 24px rgba(0,0,0,.12);
+    display: flex; flex-direction: column; position: relative;
+    background: rgba(255,255,255,.5);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.4);
+  }
+  .book-page-inner { flex: 1; padding: 24px 22px; overflow: hidden; position: relative; word-break: break-word; }
+  .book-page-inner.image-page { padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+  .book-page-inner.image-page img { width: 90%; height: auto; max-height: 70%; object-fit: contain; margin: 0 auto; border-radius: 8px; }
+  .book-page-inner.image-page .page-text { font-size: 13px; opacity: .8; margin-top: 12px; white-space: pre-wrap; }
+  .book-page-inner.letter-page { font-family: "仿宋", FangSong, "宋体", SimSun, serif; font-size: 16px; line-height: 2.2; white-space: pre-wrap; letter-spacing: 1px; }
+  .page-title { font-size: 16px; font-weight: 600; margin-bottom: 12px; letter-spacing: 1px; }
+  .image-page-title { text-align: center; margin-bottom: 8px; font-size: 14px; }
+  .book-nav-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(213,250,241,.4);
+    background: rgba(255,255,255,.15); backdrop-filter: blur(8px);
+    color: #22322A;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; flex-shrink: 0; transition: .2s;
+  }
+  .book-nav-btn:hover { background: rgba(255,255,255,.3); }
+  .book-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+  .page-indicator { text-align: center; font-size: 13px; opacity: .7; margin-top: 10px; letter-spacing: 2px; }
+
+  .comments-section {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.3);
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+  }
+  .comments-section h3 { margin: 0 0 18px; font-size: 16px; font-weight: normal; display: flex; align-items: center; gap: 8px; letter-spacing: 2px; }
+  .comments-section h3 .count { font-size: 13px; opacity: .6; font-weight: normal; }
+  .comment-input-box { background: rgba(255,255,255,.1); border: 1px solid rgba(213,250,241,.25); border-radius: 12px; padding: 14px; margin-bottom: 20px; }
+  .comment-input-box textarea {
+    width: 100%; min-height: 70px; resize: vertical;
+    border: 1px solid rgba(213,250,241,.3);
+    background: rgba(255,255,255,.15); border-radius: 10px;
+    padding: 10px; font-family: inherit; font-size: 14px; color: #22322A;
+  }
+  .comment-input-box textarea::placeholder { color: #22322A; opacity: .5; }
+  .comment-input-box textarea:focus { outline: none; border-color: rgba(197,252,224,.7); background: rgba(255,255,255,.22); }
+  .comment-input-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; flex-wrap: wrap; gap: 10px; }
+  .identity-toggle { display: flex; gap: 12px; font-size: 13px; align-items: center; }
+  .identity-toggle label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .identity-toggle input[type="radio"] { accent-color: #C5FCE0; }
+
+  .comment-list { display: flex; flex-direction: column; gap: 14px; }
+  .comment { background: rgba(255,255,255,.1); border-radius: 12px; padding: 14px 16px; border-left: 3px solid rgba(255,255,255,.4); }
+  .comment.hidden-by-owner { border-left-color: #FFE980; background: rgba(255,233,128,.15); }
+  .comment.hidden-by-self { border-left-color: rgba(255,255,255,.3); background: rgba(255,255,255,.06); opacity: .7; }
+  .comment-head { display: flex; align-items: center; gap: 8px; font-size: 13px; opacity: .8; margin-bottom: 6px; flex-wrap: wrap; }
+  .comment-head .who { font-weight: 600; font-size: 14px; letter-spacing: .5px; }
+  .comment-head .time { opacity: .6; font-size: 12px; }
+  .comment-head .badge { font-size: 10px; padding: 1px 8px; border-radius: 12px; background: rgba(255,255,255,.3); }
+  .badge-hidden { background: rgba(255,233,128,.6); color: #3F3B2B; }
+  .comment-text { white-space: pre-wrap; font-size: 14px; line-height: 1.9; }
+  .comment-actions { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .comment-actions button { padding: 3px 10px; font-size: 12px; }
+
+  .replies { margin-top: 12px; padding-left: 16px; border-left: 2px solid rgba(255,255,255,.2); display: flex; flex-direction: column; gap: 10px; }
+  .reply { background: rgba(255,255,255,.08); border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+  .reply .comment-head { margin-bottom: 4px; }
+  .reply .comment-text { font-size: 13px; }
+
+  .reply-input { margin-top: 10px; display: none; }
+  .reply-input.show { display: block; }
+  .reply-input textarea {
+    width: 100%; min-height: 50px; resize: vertical;
+    border: 1px solid rgba(213,250,241,.3);
+    background: rgba(255,255,255,.15);
+    border-radius: 10px; padding: 8px;
+    font-family: inherit; font-size: 13px; color: #22322A;
+  }
+  .reply-input .row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 6px; }
+
+  .empty-comments { text-align: center; padding: 30px 0; font-size: 14px; opacity: .6; letter-spacing: 1px; }
+
+  .msg-card {
+    background: rgba(255,255,255,.12); border-radius: 12px;
+    padding: 14px 16px; margin-bottom: 12px;
+    border-left: 3px solid rgba(197,252,224,.6);
+    cursor: pointer; transition: .2s;
+  }
+  .msg-card:hover { background: rgba(255,255,255,.2); }
+  .msg-card.notification { border-left-color: #FFE980; }
+  .msg-card.notification.unread { background: rgba(255,233,128,.15); }
+  .msg-card.mine { border-left-color: rgba(127,133,211,.7); }
+  .msg-card .msg-head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; opacity: .7; margin-bottom: 6px; gap: 8px; flex-wrap: wrap; }
+  .msg-card .msg-from { font-weight: 600; font-size: 13px; }
+  .msg-card .msg-body { font-size: 14px; white-space: pre-wrap; line-height: 1.8; }
+  .msg-card .msg-ref { font-size: 12px; opacity: .7; margin-top: 6px; padding: 4px 10px; background: rgba(255,255,255,.15); border-radius: 8px; display: inline-block; }
+  .msg-card .unread-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #C5FCE0; margin-right: 6px; vertical-align: middle; }
+
+  .settings-panel, .dev-panel {
+    background: rgba(255,255,255,.14);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(213,250,241,.3);
+    border-radius: 16px; padding: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+    margin-bottom: 20px;
+  }
+  .settings-panel h3, .dev-panel h3 { margin: 0 0 20px; font-size: 16px; font-weight: normal; display: flex; align-items: center; gap: 8px; letter-spacing: 2px; }
+  .setting-item, .dev-section { padding: 16px 0; border-bottom: 1px solid rgba(213,250,241,.2); }
+  .setting-item:last-child, .dev-section:last-child { border-bottom: none; }
+  .setting-item label { display: block; font-size: 13px; opacity: .8; margin-bottom: 8px; letter-spacing: 1px; }
+  .setting-item input[type="text"], .setting-item input[type="password"] {
+    width: 100%; max-width: 320px; padding: 9px 12px;
+    border: 1px solid rgba(213,250,241,.3);
+    background: rgba(255,255,255,.12);
+    border-radius: 10px; font-family: inherit; font-size: 14px; color: #22322A;
+  }
+  .setting-item input:focus { outline: none; border-color: rgba(197,252,224,.7); background: rgba(255,255,255,.2); }
+  .setting-item .hint-text { font-size: 12px; opacity: .6; margin-top: 6px; }
+
+  .color-options { display: flex; gap: 10px; flex-wrap: wrap; }
+  .color-dot { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: .2s; }
+  .color-dot:hover { transform: scale(1.1); }
+  .color-dot.active { border-color: rgba(197,252,224,.9); }
+
+  .icon-options { display: flex; gap: 8px; flex-wrap: wrap; }
+  .icon-opt {
+    width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; cursor: pointer; font-size: 22px;
+    border: 2px solid rgba(213,250,241,.25);
+    background: rgba(255,255,255,.1);
+    transition: .2s;
+  }
+  .icon-opt:hover { border-color: rgba(213,250,241,.5); background: rgba(255,255,255,.2); }
+  .icon-opt.active { border-color: rgba(197,252,224,.8); background: rgba(255,255,255,.28); }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+  .data-table th, .data-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(213,250,241,.2); }
+  .data-table th { background: rgba(255,255,255,.1); font-weight: 600; letter-spacing: 1px; }
+  .data-table tr:hover td { background: rgba(255,255,255,.08); }
+
+  .collapsible { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 6px; font-size: 13px; opacity: .8; letter-spacing: 1px; }
+  .collapsible:hover { opacity: 1; }
+  .collapsible .arrow { transition: .2s; display: inline-block; }
+  .collapsible.open .arrow { transform: rotate(90deg); }
+  .collapsible-content { display: none; padding-top: 12px; }
+  .collapsible-content.open { display: block; }
+
+  .danger-zone { background: rgba(211,47,47,.1); border-radius: 12px; padding: 16px; margin-top: 12px; border: 1px solid rgba(211,47,47,.3); }
+  .danger-zone .warn { color: #FFCDD2; font-size: 13px; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px; }
+
+  .add {
+    border: 2px dashed rgba(213,250,241,.4);
+    border-radius: 14px;
+    padding: 24px; text-align: center;
+    color: #22322A; opacity: .7;
+    cursor: pointer; transition: .2s;
+    background: rgba(255,255,255,.06);
+    letter-spacing: 1px;
+  }
+  .add:hover { border-color: rgba(197,252,224,.8); opacity: 1; background: rgba(255,255,255,.15); }
+  .add-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .add-row .add { flex: 1; min-width: 180px; }
+
+  .quick-add-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .quick-add-row button { padding: 8px 16px; font-size: 13px; min-height: 36px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+  .quick-add-row button svg { width: 14px; height: 14px; }
+
+  .empty { text-align: center; padding: 50px 0; font-size: 14px; opacity: .6; letter-spacing: 2px; }
+
+  .mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.35);
+    backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px; z-index: 100;
+  }
+  .mask.show { display: flex; }
+  .modal {
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(213,250,241,.5);
+    border-radius: 18px;
+    padding: 24px; width: 100%; max-width: 480px;
+    max-height: 90vh; overflow: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  }
+  .modal h3 { margin: 0 0 16px; font-weight: normal; font-size: 18px; letter-spacing: 2px; }
+  .modal label { display: block; font-size: 13px; opacity: .8; margin: 12px 0 6px; letter-spacing: 1px; }
+  .modal input, .modal textarea, .modal select {
+    width: 100%; padding: 10px;
+    border: 1px solid rgba(34,50,42,.15);
+    background: rgba(255,255,255,.7);
+    border-radius: 10px; font-family: inherit; font-size: 14px; color: #22322A;
+  }
+  .modal input:focus, .modal textarea:focus, .modal select:focus { outline: none; border-color: rgba(35,109,116,.5); background: #fff; }
+  .modal textarea { min-height: 120px; resize: vertical; }
+  .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 18px; }
+  .hint { font-size: 12px; opacity: .6; margin-top: 14px; line-height: 1.6; }
+
+  .vis-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+  .vis-opt {
+    border: 1px solid rgba(34,50,42,.15);
+    background: rgba(255,255,255,.5);
+    border-radius: 10px;
+    padding: 10px; cursor: pointer; text-align: center;
+    font-size: 13px; transition: .2s;
+  }
+  .vis-opt:hover { border-color: rgba(34,50,42,.3); }
+  .vis-opt.active { border-color: rgba(35,109,116,.5); background: rgba(35,109,116,.12); font-weight: 600; }
+  .vis-opt.disabled { opacity: .3; cursor: not-allowed; pointer-events: none; text-decoration: line-through; }
+  .vis-opt.small { padding: 6px; font-size: 12px; }
+
+  .manage-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(213,250,241,.3); }
+  .manage-actions button { flex: 1; min-width: 120px; }
+  .manage-actions button.danger { color: #d32f2f; border-color: rgba(211,47,47,.3); background: rgba(211,47,47,.08); }
+  .manage-actions button.danger:hover { background: rgba(211,47,47,.2); border-color: rgba(211,47,47,.5); color: #d32f2f; }
+
+  .new-folder-link { display: inline-block; margin-top: 8px; color: #23839D; font-size: 13px; cursor: pointer; border-bottom: 1px dashed currentColor; letter-spacing: 1px; }
+  .new-folder-link:hover { color: #1565c0; }
+
+  .lock-hint { background: rgba(255,233,128,.25); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #3F3B2B; margin-top: 10px; border: 1px solid rgba(255,233,128,.4); }
+
+  .img-uploader { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .img-thumb { position: relative; width: 80px; height: 80px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(34,50,42,.1); }
+  .img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-thumb .remove-btn { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,.55); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 1; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .img-thumb .remove-btn:hover { background: #d32f2f; }
+  .add-img-btn { width: 80px; height: 80px; border: 2px dashed rgba(34,50,42,.2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: .2s; color: #22322A; opacity: .5; background: rgba(255,255,255,.5); }
+  .add-img-btn:hover { border-color: rgba(35,109,116,.5); opacity: 1; }
+
+  .type-picker { display: flex; gap: 8px; margin-top: 6px; }
+  .type-opt { flex: 1; text-align: center; border: 2px solid rgba(34,50,42,.15); background: rgba(255,255,255,.5); border-radius: 12px; padding: 12px 8px; cursor: pointer; transition: .2s; }
+  .type-opt:hover { border-color: rgba(34,50,42,.3); }
+  .type-opt.active { border-color: rgba(35,109,116,.5); background: rgba(35,109,116,.12); font-weight: 600; }
+  .type-opt .type-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .type-opt .type-name { font-size: 12px; letter-spacing: 1px; }
+
+  .letter-preview { padding: 16px; border-radius: 10px; margin-top: 10px; min-height: 100px; font-size: 14px; line-height: 2; white-space: pre-wrap; border: 1px solid rgba(34,50,42,.1); font-family: "仿宋", FangSong, "宋体", SimSun, serif; color: #22322A; }
+
+  .bgcolor-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .bgcolor-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: .2s; box-shadow: 0 2px 6px rgba(0,0,0,.1); }
+  .bgcolor-dot:hover { transform: scale(1.1); }
+  .bgcolor-dot.active { border-color: rgba(35,109,116,.8); }
+
+  .undo-toast {
+    position: fixed; left: 50%; bottom: 20px;
+    transform: translateX(-50%);
+    background: rgba(34,50,42,.85);
+    backdrop-filter: blur(16px);
+    color: #C5FCE0;
+    padding: 12px 16px; border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.25);
+    display: flex; align-items: center; gap: 14px;
+    z-index: 110; font-size: 14px;
+    max-width: calc(100vw - 40px);
+    animation: slideUp .25s ease;
+    letter-spacing: 1px;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .undo-toast .msg { flex: 1; }
+  .undo-toast button { background: rgba(197,252,224,.9); color: #22322A; border: none; padding: 5px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+  .undo-toast button:hover { background: #C5FCE0; }
+
+  .batch-bar {
+    position: fixed; left: 50%; bottom: 20px;
+    transform: translateX(-50%);
+    background: rgba(34,50,42,.85);
+    backdrop-filter: blur(16px);
+    color: #C5FCE0;
+    padding: 12px 20px; border-radius: 30px;
+    box-shadow: 0 6px 24px rgba(0,0,0,.25);
+    display: flex; align-items: center; gap: 14px;
+    z-index: 90; font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .batch-bar button { background: rgba(197,252,224,.9); color: #22322A; border: none; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .batch-bar button:hover { background: #C5FCE0; }
+  .batch-bar button.danger { background: rgba(255,205,210,.9); color: #7f1d1d; }
+  .batch-bar button.danger:hover { background: #FFCDD2; }
+
+  body.select-mode .desktop .folder::before,
+  body.select-mode .desktop .file-card::before {
+    content: "";
+    position: absolute; top: 10px; left: 10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid rgba(213,250,241,.6);
+    background: rgba(255,255,255,.3);
+    z-index: 5; transition: .2s;
+  }
+  body.select-mode .desktop .folder.selected::before,
+  body.select-mode .desktop .file-card.selected::before {
+    content: "✓";
+    background: #C5FCE0; color: #22322A;
+    border-color: #C5FCE0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+  }
+  body.select-mode .folder .edit-btn { display: none; }
+
+  .comment-drawer-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.3);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: .25s;
+  }
+  .comment-drawer-mask.show { opacity: 1; pointer-events: auto; }
+  .comment-drawer {
+    position: fixed; top: 0; right: -460px;
+    width: 420px; max-width: 100vw;
+    height: 100vh;
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-left: 1px solid rgba(213,250,241,.4);
+    z-index: 201;
+    box-shadow: -4px 0 30px rgba(0,0,0,.15);
+    transition: right .25s ease;
+    display: flex; flex-direction: column;
+  }
+  .comment-drawer.show { right: 0; }
+  .comment-drawer-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(34,50,42,.1);
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600;
+    letter-spacing: 2px;
+  }
+  .comment-drawer-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .comment-drawer-body .comments-section { padding: 0; box-shadow: none; background: transparent; border: none; backdrop-filter: none; }
+
+  .letter-modal-mask {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .letter-modal-mask.show { display: flex; }
+  .letter-modal {
+    background: rgba(245,245,245,.95);
+    backdrop-filter: blur(24px);
+    width: 100%; max-width: 720px;
+    height: 90vh;
+    border-radius: 20px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(213,250,241,.5);
+    box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  }
+  .letter-modal-head { padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(34,50,42,.08); background: rgba(255,255,255,.5); }
+  .letter-modal-title { font-weight: 600; font-size: 15px; letter-spacing: 1px; }
+  .letter-modal-body { flex: 1; overflow-y: auto; padding: 24px; }
+  .letter-paper-full { padding: 60px 48px; border-radius: 12px; line-height: 2.4; font-size: 17px; font-family: "仿宋", FangSong, "宋体", SimSun, serif; min-height: 400px; white-space: pre-wrap; margin-bottom: 24px; box-shadow: 0 2px 16px rgba(0,0,0,.08); letter-spacing: 1px; color: #22322A; }
+  .letter-paper-date { text-align: right; font-size: 14px; opacity: .7; margin-top: 30px; }
+  .letter-comments { background: rgba(255,255,255,.7); backdrop-filter: blur(16px); border-radius: 14px; padding: 20px; border: 1px solid rgba(213,250,241,.4); }
+  .letter-comments .comments-section { padding: 0; box-shadow: none; background: transparent; border: none; backdrop-filter: none; }
+
+  .comment-toggle-btn { font-size: 13px; padding: 6px 14px; border-radius: 10px; display: flex; align-items: center; gap: 6px; }
+  .comment-toggle-btn svg { width: 16px; height: 16px; }
+
+  @media (max-width: 767px) {
+    header { padding: 12px 14px; }
+    header h1 { font-size: 14px; letter-spacing: 1px; }
+    .user { font-size: 13px; gap: 6px; }
+    .user button { padding: 8px 14px; font-size: 13px; min-height: 38px; }
+    main { padding: 16px 12px 80px; }
+    .hero { padding: 30px 0 24px; }
+    .hero h2 { font-size: 22px; letter-spacing: 2px; }
+    .hero p { font-size: 13px; line-height: 2; }
+    .spaces { grid-template-columns: 1fr; gap: 12px; margin-top: 24px; }
+    .space-card { padding: 20px 18px; display: flex; align-items: center; gap: 14px; text-align: left; }
+    .space-card .icon { font-size: 32px; margin-bottom: 0; flex-shrink: 0; }
+    .space-card .name { font-size: 16px; }
+    .space-card .role { font-size: 12px; margin-top: 2px; }
+    .space-header { padding: 16px 18px; margin-bottom: 12px; border-radius: 14px; }
+    .space-header .title-row { flex-direction: column; gap: 10px; }
+    .space-header h2 { font-size: 18px; }
+    .space-header button { padding: 8px 14px; font-size: 13px; min-height: 38px; }
+    .breadcrumb { font-size: 12px; }
+    .calendar-module { padding: 10px 14px; }
+    .cal-collapsed .cal-left { font-size: 13px; }
+    .cal-day { font-size: 11px; }
+    .filters { padding: 12px; margin-bottom: 10px; }
+    .filters input[type="text"] { padding: 11px 14px; font-size: 15px; }
+    .filter-row { font-size: 12px; }
+    .filter-row select, .filter-row input[type="date"] { padding: 7px 10px; font-size: 13px; }
+    .tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 4px; gap: 4px; margin-bottom: 14px; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab { flex: 0 0 auto; min-width: auto; padding: 9px 14px; font-size: 13px; white-space: nowrap; }
+    .subtabs { flex-wrap: wrap; gap: 4px; }
+    .subtab { padding: 9px 10px; font-size: 12px; min-width: 60px; }
+    .subtab-actions { padding: 0 4px; }
+    .bingo-btn { padding: 7px 14px; font-size: 12px; }
+    .desktop { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .folder, .file-card { padding: 12px; border-radius: 12px; }
+    .folder .fname { font-size: 13px; padding-right: 26px; }
+    .folder .fname svg { width: 16px; height: 16px; }
+    .folder .fmeta { font-size: 11px; }
+    .folder .edit-btn { width: 26px; height: 26px; opacity: 1; }
+    .file-card .ftitle { font-size: 13px; }
+    .file-card .text { font-size: 12px; -webkit-line-clamp: 2; }
+    .file-card .meta { font-size: 10px; gap: 6px; }
+    .file-card img { height: 90px; margin-bottom: 8px; }
+    .file-card .mine-tag { font-size: 9px; padding: 1px 6px; top: 8px; right: 8px; }
+    .file-card .folder-tag { font-size: 10px; }
+    .file-card .img-count-badge { bottom: 6px; right: 6px; font-size: 10px; }
+    .reader-split { flex-direction: column; gap: 16px; }
+    .reader-left, .reader-right { flex: none; max-width: 100%; width: 100%; }
+    .reader-title { font-size: 18px; }
+    .reader-text { font-size: 14px; }
+    .book-area { gap: 6px; }
+    .book-page-wrap { max-width: 100%; width: 100%; }
+    .book-nav-btn { width: 34px; height: 34px; font-size: 16px; }
+    .book-page-inner { padding: 18px 16px; }
+    .book-page-inner.letter-page { font-size: 15px; line-height: 2; }
+    .detail-topbar-actions button { flex: 1; }
+    .comments-section { padding: 16px; border-radius: 12px; }
+    .comment-input-box { padding: 12px; }
+    .comment-input-box textarea { min-height: 80px; font-size: 15px; }
+    .comment-input-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+    .identity-toggle { justify-content: space-around; font-size: 13px; padding: 4px 0; }
+    .comment-input-actions button.primary { width: 100%; padding: 11px; font-size: 15px; min-height: 44px; }
+    .comment { padding: 12px 14px; }
+    .comment-head .who { font-size: 13px; }
+    .comment-text { font-size: 14px; }
+    .comment-actions button { padding: 6px 12px; font-size: 12px; min-height: 32px; }
+    .comment-drawer { top: auto; bottom: 0; right: 0; left: 0; width: 100%; height: 70vh; border-radius: 20px 20px 0 0; box-shadow: 0 -4px 30px rgba(0,0,0,.15); transform: translateY(100%); transition: transform .25s ease; }
+    .comment-drawer.show { transform: translateY(0); right: 0; }
+    .letter-modal { max-width: 100%; height: 100vh; border-radius: 0; }
+    .letter-modal-body { padding: 16px; }
+    .letter-paper-full { padding: 32px 24px; font-size: 15px; line-height: 2.2; }
+    .settings-panel, .dev-panel { padding: 16px; border-radius: 12px; }
+    .setting-item input[type="text"], .setting-item input[type="password"] { max-width: 100%; font-size: 15px; padding: 10px 12px; }
+    .settings-panel button.primary { width: 100%; padding: 11px; min-height: 44px; font-size: 15px; }
+    .color-dot { width: 42px; height: 42px; }
+    .icon-opt { width: 48px; height: 48px; font-size: 24px; }
+    .dev-section input, .dev-section select { width: 100%; margin-right: 0; padding: 10px 12px; font-size: 15px; }
+    .dev-section button.primary { width: 100%; padding: 11px; min-height: 44px; font-size: 15px; }
+    .data-table { font-size: 12px; display: block; overflow-x: auto; white-space: nowrap; }
+    .add { padding: 16px; font-size: 14px; }
+    .add-row { flex-direction: column; gap: 10px; }
+    .add-row .add { min-width: auto; }
+    .quick-add-row { gap: 6px; }
+    .quick-add-row button { flex: 1; min-width: auto; padding: 10px 12px; font-size: 13px; min-height: 42px; }
+    .mask { padding: 12px; align-items: flex-end; }
+    .modal { max-width: 100%; border-radius: 20px 20px 0 0; padding: 22px 20px 26px; max-height: 85vh; }
+    .modal h3 { font-size: 16px; }
+    .modal input, .modal textarea, .modal select { padding: 11px; font-size: 15px; }
+    .actions button { padding: 11px 18px; font-size: 14px; min-height: 44px; }
+    .vis-options { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .vis-opt { padding: 12px 8px; font-size: 13px; }
+    .manage-actions { flex-direction: column; }
+    .manage-actions button { min-width: auto; padding: 11px; min-height: 44px; }
+    .batch-bar { bottom: 12px; padding: 10px 14px; font-size: 13px; gap: 10px; }
+    .batch-bar button { padding: 6px 12px; font-size: 12px; }
+    .undo-toast { bottom: 12px; padding: 10px 14px; font-size: 13px; }
+    .img-thumb { width: 70px; height: 70px; }
+    .add-img-btn { width: 70px; height: 70px; }
+    .type-picker { flex-direction: column; }
+    .cal-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .cal-title { font-size: 13px; }
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    main { padding: 30px 24px 80px; }
+    .spaces { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px; }
+    .desktop { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .folder .edit-btn { opacity: 1; }
+    .modal { max-width: 520px; }
+  }
+
+  @media (hover: none) {
+    .space-card:hover, .folder:hover, .file-card:hover { transform: none; }
+    .space-card:active, .folder:active, .file-card:active { transform: scale(0.98); }
+    .folder .edit-btn { opacity: 1; }
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(197,252,224,.4); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(197,252,224,.7); }
+  /* 浅色弹窗内的文字改成深色 */
+  .modal {
+    color: #22322A;
+  }
+  .modal h3 {
+    color: #22322A;
+  }
+  .modal label {
+    color: #22322A;
+    opacity: .85;
+  }
+  .modal input,
+  .modal textarea,
+  .modal select {
+    color: #22322A;
+  }
+  .modal .hint {
+    color: #22322A;
+    opacity: .6;
+  }
+  /* 弹窗里的按钮：深色文字 + 浅底 */
+  .modal button {
+    color: #22322A;
+    background: rgba(255,255,255,.6);
+    border-color: rgba(34,50,42,.2);
+  }
+  .modal button:hover {
+    background: rgba(34,50,42,.1);
+    border-color: rgba(34,50,42,.35);
+    color: #22322A;
+  }
+  .modal button.primary {
+    background: rgba(35,109,116,.15);
+    border-color: rgba(35,109,116,.4);
+    color: #22322A;
+  }
+  .modal button.primary:hover {
+    background: rgba(35,109,116,.25);
+  }
+  .modal button.danger {
+    color: #d32f2f;
+    border-color: rgba(211,47,47,.3);
+    background: rgba(211,47,47,.08);
+  }
+  .modal button.danger:hover {
+    background: rgba(211,47,47,.2);
+    border-color: rgba(211,47,47,.5);
+    color: #d32f2f;
+  }
+  /* 弹窗里的说明框 */
+  .modal .lock-hint {
+    color: #3F3B2B;
+  }
+  /* 弹窗里的 vis-opt 等选项 */
+  .modal .vis-opt {
+    color: #22322A;
+  }
+  .modal .vis-opt.active {
+    color: #22322A;
+  }
+  .modal .type-opt {
+    color: #22322A;
+  }
+  .modal .type-opt.active {
+    color: #22322A;
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header>
+  <h1>Lucent · Rain · Surge</h1>
+  <div class="user">
+    <span id="whoami"></span>
+    <button id="loginBtn">Enter</button>
+    <button id="logoutBtn" style="display:none">Exit</button>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<div class="mask" id="loginModal">
+  <div class="modal">
+    <h3>登录</h3>
+    <label>账号</label>
+    <input id="inUser" placeholder="a / b / X / guest">
+    <label>密码</label>
+    <input id="inPass" type="password" placeholder="123456">
+    <div class="actions">
+      <button onclick="closeModal('loginModal')">取消</button>
+      <button class="primary" id="doLogin">Enter</button>
+    </div>
+    <div class="hint">测试账号：a / b / X / guest，密码都是 123456</div>
+  </div>
+</div>
+
+<div class="mask" id="editModal">
+  <div class="modal">
+    <h3 id="editTitle">新增文件</h3>
+    <label>文件类型</label>
+    <div class="type-picker" id="typePicker">
+      <div class="type-opt" data-type="image"><span class="type-icon">📝</span><span class="type-name">图文</span></div>
+      <div class="type-opt" data-type="letter"><span class="type-icon">✍️</span><span class="type-name">写文字</span></div>
+    </div>
+
+    <div id="commonFields">
+      <label>标题</label>
+      <input id="inTitle" placeholder="给这个文件起个名字">
+    </div>
+
+    <div id="imageFields">
+      <label>图片（可多张）</label>
+      <div class="img-uploader" id="imgUploader"></div>
+      <input id="inImg" type="file" accept="image/*" multiple style="display:none">
+      <label>正文</label>
+      <textarea id="inText" placeholder="写点什么…"></textarea>
+    </div>
+
+    <div id="letterFields" style="display:none">
+      <label>日期</label>
+      <input id="inLetterDate" type="text" placeholder="例：2025年1月1日">
+      <label>正文</label>
+      <textarea id="inLetterText" placeholder="写下你的文字…"></textarea>
+
+      <label>信纸背景色</label>
+      <div class="bgcolor-options" id="bgcolorOptions">
+        <div class="bgcolor-dot" data-color="#FEF8DA" style="background:#FEF8DA"></div>
+        <div class="bgcolor-dot" data-color="#FDFBF6" style="background:#FDFBF6"></div>
+        <div class="bgcolor-dot" data-color="#F0F7FF" style="background:#F0F7FF"></div>
+        <div class="bgcolor-dot" data-color="#F5F0FF" style="background:#F5F0FF"></div>
+        <div class="bgcolor-dot" data-color="#FFF0F0" style="background:#FFF0F0"></div>
+        <div class="bgcolor-dot" data-color="#F0FFF4" style="background:#F0FFF4"></div>
+      </div>
+
+      <label>预览</label>
+      <div class="letter-preview" id="letterPreview">信件预览会显示在这里</div>
+    </div>
+
+    <label>放入文件夹（可选）</label>
+    <select id="inFolder"><option value="">（不放入文件夹）</option></select>
+    <div class="actions">
+      <button onclick="closeModal('editModal')">取消</button>
+      <button class="primary" id="saveEdit">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="folderModal">
+  <div class="modal">
+    <h3 id="folderTitle">新建文件夹</h3>
+    <label>文件夹名称</label>
+    <input id="inFolderName" placeholder="给文件夹起个名字">
+    <div id="folderParentInfo" class="lock-hint" style="display:none"></div>
+    <label>谁能看</label>
+    <div class="vis-options" id="visOptions">
+      <div class="vis-opt" data-vis="public">所有人可见</div>
+      <div class="vis-opt" data-vis="ours">我们可见</div>
+      <div class="vis-opt" data-vis="private">仅自己可见</div>
+      <div class="vis-opt" data-vis="password">密码可见</div>
+    </div>
+    <div id="pwdWrap" style="display:none">
+      <label>设置密码</label>
+      <input id="inFolderPwd" placeholder="进入文件夹需要的密码">
+    </div>
+    <div class="manage-actions" id="folderManageZone" style="display:none">
+      <button onclick="openMoveFolderFromManage()">📦 移动到…</button>
+      <button class="danger" onclick="askDeleteFolder()">🗑 删除此文件夹</button>
+    </div>
+    <div class="actions">
+      <button onclick="closeModal('folderModal')">取消</button>
+      <button class="primary" id="saveFolder">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="delFolderModal">
+  <div class="modal">
+    <h3>🗑 删除文件夹</h3>
+    <p id="delFolderMsg" style="font-size:14px;opacity:.7"></p>
+    <p style="font-size:13px;opacity:.6;margin-top:12px">请选择如何处理里面的内容：</p>
+    <div class="actions" style="flex-direction:column;align-items:stretch;gap:8px">
+      <button class="danger" id="delWithFiles" style="padding:10px">连同内容一起删除</button>
+      <button id="delMoveOut" style="padding:10px">内容移出来（变成散落）</button>
+      <button onclick="closeModal('delFolderModal')" style="padding:10px">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="moveModal">
+  <div class="modal">
+    <h3 id="moveTitle">📦 移动到…</h3>
+    <label>选择目标文件夹</label>
+    <select id="moveTarget"><option value="">（不放入文件夹 / 散落）</option></select>
+    <div>
+      <span class="new-folder-link" onclick="toggleInlineNewFolder()">＋ 新建文件夹并移入</span>
+    </div>
+    <div id="inlineNewFolder" style="display:none;margin-top:14px;padding-top:14px;border-top:1px dashed rgba(213,250,241,.3)">
+      <label>新文件夹名称</label>
+      <input id="inlineFolderName" placeholder="给文件夹起个名字">
+      <label>谁能看</label>
+      <div class="vis-options" id="inlineVisOptions">
+        <div class="vis-opt small" data-vis="public">所有人可见</div>
+        <div class="vis-opt small" data-vis="ours">我们可见</div>
+        <div class="vis-opt small" data-vis="private">仅自己可见</div>
+        <div class="vis-opt small" data-vis="password">密码可见</div>
+      </div>
+      <div id="inlinePwdWrap" style="display:none">
+        <label>设置密码</label>
+        <input id="inlineFolderPwd" placeholder="进入文件夹需要的密码">
+      </div>
+      <button class="primary" style="margin-top:12px;width:100%" onclick="createInlineFolder()">创建并选中</button>
+    </div>
+    <div class="actions">
+      <button onclick="closeModal('moveModal')">取消</button>
+      <button class="primary" id="doMove">移动</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="pwdModal">
+  <div class="modal">
+    <h3>🔑 输入密码</h3>
+    <p style="opacity:.7;font-size:13px;margin:0 0 8px" id="pwdFolderName"></p>
+    <input id="inUnlockPwd" type="password" placeholder="文件夹密码">
+    <div class="actions">
+      <button onclick="closeModal('pwdModal')">取消</button>
+      <button class="primary" id="doUnlock">进入</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="calDayModal">
+  <div class="modal">
+    <h3 id="calDayTitle"></h3>
+    <div class="cal-records" id="calRecords" style="max-height:300px;overflow-y:auto;margin:12px 0"></div>
+    <div class="cal-add-box" id="calAddBox" style="display:flex;gap:8px;margin-top:12px">
+      <textarea id="calNewRecord" placeholder="写点什么…" onfocus="scrollToInput(this)" style="flex:1;min-height:50px;resize:vertical;border:1px solid rgba(34,50,42,.15);background:rgba(255,255,255,.7);border-radius:10px;padding:8px;font-family:inherit;font-size:13px;color:#22322A"></textarea>
+    </div>
+    <div class="actions">
+      <button onclick="closeModal('calDayModal')">关闭</button>
+      <button class="primary" id="calAddBtn">添加记录</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="resetModal">
+  <div class="modal">
+    <h3>⚠️ 重置全部数据</h3>
+    <p style="font-size:14px;opacity:.7">
+      这将清空所有账号、空间、文件夹、文件、留言、通知，恢复成出厂状态。<br>
+      <b style="color:#d32f2f">此操作不可撤销！</b>
+    </p>
+    <label>请输入 <b>RESET</b> 以确认</label>
+    <input id="inResetConfirm" placeholder="RESET" autocomplete="off">
+    <div class="actions">
+      <button onclick="closeModal('resetModal')">取消</button>
+      <button class="danger" id="doReset">确认重置</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ============================================================
+   Supabase 云端配置
+   ============================================================ */
+const SUPABASE_URL = "https://cdmadfzlejuafoymvfex.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNkbWFkZnpsZWp1YWZveW12ZmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMTAxODksImV4cCI6MjEwNjc4NjE4OX0.OWEWZ8OJV_AOCfxqLgdiTu2rLS_Uz8K5nSpgeBnVg68";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const CLOUD_KEY = "main";
+
+// 加载状态
+let dataLoaded = false;
+
+// 从云端拉数据
+async function loadFromCloud() {
+  try {
+    const { data: rows, error } = await supabaseClient
+      .from("kv_store")
+      .select("value")
+      .eq("key", CLOUD_KEY)
+      .maybeSingle();
+    if (error) throw error;
+    if (rows && rows.value) {
+      dataLoaded = true;
+      return rows.value;
+    } else {
+      dataLoaded = true;
+      return null;
+    }
+  } catch (e) {
+    console.error("加载云端失败：", e);
+    dataLoaded = true;
+    return null;
+  }
+}
+
+// 保存数据到云端
+async function saveToCloud(payload) {
+  try {
+    const { error } = await supabaseClient
+      .from("kv_store")
+      .upsert({ key: CLOUD_KEY, value: payload, updated_at: new Date().toISOString() });
+    if (error) throw error;
+  } catch (e) {
+    console.error("保存云端失败：", e);
+    alert("保存失败，请检查网络");
+  }
+}
+/* ============================================================
+   配置
+   ============================================================ */
+const DATA_VERSION = 13;
+const DATA_KEY  = "spaces_data_v3";
+const LOGIN_KEY = "spaces_login_v2";
+
+const VIS_LABEL = {
+  public:   { text: "所有人可见", cls: "vis-public" },
+  ours:     { text: "我们可见",   cls: "vis-ours" },
+  private:  { text: "仅自己可见", cls: "vis-private" },
+  password: { text: "密码可见",   cls: "vis-password" },
+};
+const VIS_RANK = { public: 0, password: 1, ours: 2, private: 3 };
+
+const COLOR_CARDS = [
+  { bg: "#FFE980", border: "#FDFBDA", text: "#3F3B2B", type: "warm" },
+  { bg: "#E8CE52", border: "#FDFBDA", text: "#3F3B2B", type: "warm" },
+  { bg: "#CCB543", border: "#FDFBDA", text: "#3F3B2B", type: "warm" },
+  { bg: "#CD9E43", border: "#FDFBDA", text: "#3F3B2B", type: "warm" },
+  { bg: "#88E2D1", border: "#D5FAF1", text: "#293D52", type: "cool" },
+  { bg: "#60BEAC", border: "#D5FAF1", text: "#293D52", type: "cool" },
+  { bg: "#3E9EA0", border: "#D5FAF1", text: "#293D52", type: "cool" },
+  { bg: "#23839D", border: "#D5FAF1", text: "#293D52", type: "cool" },
+];
+
+const SPACE_THEMES = {
+  red:   { name: "红", bg: "#BF8180", accent: "#99504F" },
+  blue:  { name: "蓝", bg: "#224A80", accent: "#1B3557" },
+  green: { name: "绿", bg: "#5E9C74", accent: "#386B4B" },
+  yellow:{ name: "黄", bg: "#F0D876", accent: "#AE973C" },
+};
+
+const SPACE_ICONS = [
+  "🌿","🍃","🌸","🌺","🌻","🌷","🌾","🍂","🍁","🌙",
+  "⭐","✨","☁️","🌧️","⛅","🌈","🦋","🕊️","🐚","🐟",
+  "🦢","🪷","📖","📜","🗝️","🕯️","🎐","🔮","⏳","🪶"
+];
+
+/* ============================================================
+   数据
+   ============================================================ */
+function defaultData() {
+  return {
+    version: DATA_VERSION,
+    home: {
+      title: "Lucent · Rain · Surge",
+      subtitle: "雨滴落入大海没有回声，\n直至落雨成海，\n光也成了海的一部分。"
+    },
+    accounts: {
+      a:     { password: "123456", role: "owner", owns: "A", nickname: "a" },
+      b:     { password: "123456", role: "owner", owns: "B", nickname: "b" },
+      X:     { password: "123456", role: "dev",   owns: null, nickname: "X" },
+      guest: { password: "123456", role: "guest", owns: null, nickname: "guest" },
+    },
+    spaces: {
+      A: {
+        name: "A空间", icon: "🌿", theme: "green", cardColor: 4,
+        folders: [
+          { id: 101, name: "X的来信", visibility: "public", password: "", creator: "X", parentId: null, time: Date.now(), deleted: false, history: [] }
+        ],
+        files: [
+          { id: 1, type: "image", title: "欢迎来到 A空间", imgs: [], text: "这是 X 提前放进来的第一封信。\n\n你可以点开它，看到里面的内容。",
+            author: "X", folderId: 101, time: Date.now(), updatedAt: Date.now(), deleted: false, history: [] }
+        ],
+        comments: [],
+        notifications: [],
+        calendar: []
+      },
+      B: { name: "B空间", icon: "🌸", theme: "yellow", cardColor: 0, folders: [], files: [], comments: [], notifications: [], calendar: [] },
+      X: { name: "X空间", icon: "✨", theme: "blue",   cardColor: 7, folders: [], files: [], comments: [], notifications: [], calendar: [] },
+    }
+  };
+}
+
+function migrateData(old) {
+  if (!old) return defaultData();
+  const nd = defaultData();
+  if (old.home) nd.home = old.home;
+  if (old.accounts) nd.accounts = old.accounts;
+
+  // 强制更新首页标题为新版
+  nd.home.title = "Lucent · Rain · Surge";
+  if (!nd.home.subtitle || nd.home.subtitle === "欢迎来到空间站") {
+    nd.home.subtitle = "雨滴落入大海没有回声，\n直至落雨成海，\n光也成了海的一部分。";
+  }
+
+  Object.keys(old.spaces || {}).forEach(sid => {
+    if (!nd.spaces[sid]) {
+      nd.spaces[sid] = { name: sid+"空间", icon: "🌿", theme: "green", cardColor: Math.floor(Math.random()*8), folders: [], files: [], comments: [], notifications: [], calendar: [] };
+    }
+    const s = old.spaces[sid];
+    nd.spaces[sid].name = s.name || nd.spaces[sid].name;
+    nd.spaces[sid].icon = s.icon || nd.spaces[sid].icon;
+    nd.spaces[sid].theme = s.theme || nd.spaces[sid].theme || "green";
+    nd.spaces[sid].cardColor = (typeof s.cardColor === "number") ? s.cardColor : Math.floor(Math.random()*8);
+    nd.spaces[sid].folders = s.folders || [];
+    nd.spaces[sid].comments = s.comments || [];
+    nd.spaces[sid].notifications = s.notifications || [];
+    nd.spaces[sid].calendar = s.calendar || [];
+
+    nd.spaces[sid].files = (s.files || []).map(f => {
+      const nf = { ...f };
+      if (!nf.type) nf.type = "image";
+      if (nf.imgs === undefined) nf.imgs = nf.img ? [nf.img] : [];
+      delete nf.img;
+      if (nf.type === "letter") {
+        if (!nf.letterBgColor) nf.letterBgColor = "#FEF8DA";
+        delete nf.letterTexture;
+        delete nf.letterFont;
+        delete nf.letterBgImage;
+        if (!nf.letterDate) nf.letterDate = "";
+      }
+      return nf;
+    });
+  });
+  return nd;
+}
+
+let data = null;
+let currentUser = localStorage.getItem(LOGIN_KEY) || null;
+let currentSpace = null;
+let currentFolderId = null;
+let currentFileId = null;
+let activeTab = "all";
+let messageSubTab = "received";
+
+let filterKeyword = "";
+let filterDate = "all";
+let filterDateFrom = "";
+let filterDateTo = "";
+let unlockedFolders = new Set();
+
+let editingId = null;
+let editingFolderId = null;
+let pendingImgs = [];
+let pendingType = "image";
+let pendingLetter = { bgColor: "#FEF8DA" };
+let pendingVis = "public";
+let devCollapsed = { reset: true };
+
+let selectMode = false;
+let selectedIds = new Set();
+let undoTimer = null;
+let batchMoveIds = [];
+
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calSelectedDate = null;
+let calExpanded = false;
+
+let currentPage = 0;
+
+function save() {
+  data.version = DATA_VERSION;
+  // 同步存本地（缓存，防止网断了丢数据）
+  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+  // 异步存云端
+  saveToCloud(data);
+}
+/* ============================================================
+   权限
+   ============================================================ */
+/* ============================================================
+   账号 / 图标 / 主题
+   ============================================================ */
+function getAccount(user) { return data.accounts[user] || null; }
+function getNickname(user) {
+  const acc = data.accounts[user];
+  return acc ? (acc.nickname || user) : user;
+}
+function displayName(user) { return getNickname(user); }
+
+function getSpaceTheme(spaceId) {
+  const sp = data.spaces[spaceId];
+  const themeKey = (sp && sp.theme) || "green";
+  return SPACE_THEMES[themeKey] || SPACE_THEMES.green;
+}
+function getSpaceCardColor(spaceId) {
+  const sp = data.spaces[spaceId];
+  const idx = (sp && typeof sp.cardColor === "number") ? sp.cardColor : 0;
+  return COLOR_CARDS[idx] || COLOR_CARDS[0];
+}
+function hexToRgba(hex, alpha) {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0,2), 16);
+  const g = parseInt(h.substring(2,4), 16);
+  const b = parseInt(h.substring(4,6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+function getMode(user, spaceId) {
+  if (!user) return null;
+  const acc = data.accounts[user];
+  if (!acc) return null;
+  if (acc.role === "dev") return "x";
+  if (acc.owns === spaceId) return "owner";
+  return "guest";
+}
+function canAdd(mode) { return mode === "owner" || mode === "x"; }
+function canModifyFile(f) { return currentUser && f.author === currentUser; }
+function canManageFolder(folder) { return currentUser && folder.creator === currentUser; }
+
+function getFolderChain(folderId) {
+  const spaceData = data.spaces[currentSpace];
+  if (!spaceData || !folderId) return [];
+  const chain = [];
+  let cur = spaceData.folders.find(f => f.id === folderId);
+  while (cur) {
+    chain.unshift(cur);
+    cur = cur.parentId ? spaceData.folders.find(f => f.id === cur.parentId) : null;
+  }
+  return chain;
+}
+function isDescendant(folder, maybeAncestorId) {
+  const spaceData = data.spaces[currentSpace];
+  let cur = folder;
+  while (cur && cur.parentId) {
+    if (cur.parentId === maybeAncestorId) return true;
+    cur = spaceData.folders.find(f => f.id === cur.parentId);
+  }
+  return false;
+}
+function getInheritConstraint(parentId) {
+  if (!parentId) return null;
+  const spaceData = data.spaces[currentSpace];
+  const parent = spaceData.folders.find(f => f.id === parentId);
+  if (!parent) return null;
+  return parent.visibility;
+}
+function isVisAllowed(vis, parentVis) {
+  if (!parentVis) return true;
+  return VIS_RANK[vis] >= VIS_RANK[parentVis];
+}
+function canSeeFolder(folder, user, mode) {
+  if (!folder || folder.deleted) return false;
+  if (!user) return false;
+  const creator = folder.creator;
+  switch (folder.visibility) {
+    case "public":   return true;
+    case "ours":     return mode === "owner" || mode === "x";
+    case "private":  return user === creator;
+    case "password": {
+      if (user === creator || mode === "x") return true;
+      if (unlockedFolders.has(folder.id)) return true;
+      const chain = getFolderChain(folder.id);
+      for (const f of chain) {
+        if (f.id !== folder.id && unlockedFolders.has(f.id)) return true;
+      }
+      return false;
+    }
+    default: return false;
+  }
+}
+function canReplyComment(mode) { return mode === "owner" || mode === "x"; }
+function canHideAnyComment(mode) { return mode === "owner" || mode === "x"; }
+function canDeleteComment(c) { return currentUser && c.author === currentUser; }
+
+/* ============================================================
+   通知
+   ============================================================ */
+function pushNotification(toUser, notice) {
+  const acc = data.accounts[toUser];
+  if (!acc) return;
+  let targetSpaceId = null;
+  if (acc.role === "dev") targetSpaceId = "X";
+  else if (acc.owns) targetSpaceId = acc.owns;
+  else return;
+  if (!data.spaces[targetSpaceId]) return;
+  if (!data.spaces[targetSpaceId].notifications) data.spaces[targetSpaceId].notifications = [];
+  data.spaces[targetSpaceId].notifications.push({
+    id: Date.now() + Math.random(),
+    to: toUser,
+    ...notice,
+    time: Date.now(),
+    read: false
+  });
+}
+function getMyNotifications() {
+  if (!currentSpace) return [];
+  const sp = data.spaces[currentSpace];
+  if (!sp || !sp.notifications) return [];
+  return sp.notifications.filter(n => n.to === currentUser);
+}
+function getUnreadNotificationCount() {
+  return getMyNotifications().filter(n => !n.read).length;
+}
+function markAllNotificationsRead() {
+  if (!currentSpace) return;
+  const sp = data.spaces[currentSpace];
+  if (!sp || !sp.notifications) return;
+  sp.notifications.forEach(n => { if (n.to === currentUser) n.read = true; });
+  save();
+  render();
+}
+
+/* ============================================================
+   撤销
+   ============================================================ */
+function showUndoToast(msg, undoFn) {
+  if (undoTimer) clearTimeout(undoTimer);
+  const old = document.querySelector(".undo-toast");
+  if (old) old.remove();
+
+  const el = document.createElement("div");
+  el.className = "undo-toast";
+  el.innerHTML = `<span class="msg">${esc(msg)}</span><button id="undoBtn">回退</button>`;
+  document.body.appendChild(el);
+
+  document.getElementById("undoBtn").onclick = () => {
+    if (undoTimer) clearTimeout(undoTimer);
+    el.remove();
+    undoFn();
+  };
+
+  undoTimer = setTimeout(() => {
+    el.remove();
+    undoTimer = null;
+  }, 5000);
+}
+
+/* ============================================================
+   SVG 图标
+   ============================================================ */
+const SVG = {
+  back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>`,
+  comment: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+  edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  move: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>`,
+  folder: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6l2 3h8v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+  close: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`,
+  plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>`,
+};
+
+/* ============================================================
+   渲染
+   ============================================================ */
+const app = document.getElementById("app");
+
+function applySpaceTheme() {
+  const bg = document.body;
+  if (currentSpace && data.spaces[currentSpace]) {
+    const theme = getSpaceTheme(currentSpace);
+    bg.style.background = theme.bg;
+  } else {
+    bg.style.background = "#236D74";
+  }
+}
+
+function render() {
+  const header = document.querySelector("header h1");
+  if (header) header.textContent = data.home.title || "Lucent · Rain · Surge";
+
+  const whoami = document.getElementById("whoami");
+  if (whoami) whoami.textContent = currentUser ? "👤 " + displayName(currentUser) : "";
+
+  document.getElementById("loginBtn").style.display  = currentUser ? "none" : "";
+  document.getElementById("logoutBtn").style.display = currentUser ? "" : "none";
+
+  document.body.classList.toggle("select-mode", selectMode);
+  applySpaceTheme();
+
+  if (!currentUser)     return renderHome();
+  if (currentFileId)    return renderDetail();
+  if (currentSpace)     return renderSpaceOrFolder();
+  return renderHome();
+}
+
+function renderHome() {
+  const subtitleHtml = (data.home.subtitle || "").split("\n").map(line => esc(line)).join("<br>");
+  let html = `
+    <div class="hero">
+      <h2>${esc(data.home.title || "Lucent · Rain · Surge")}</h2>
+      <p>${currentUser ? subtitleHtml : "请点击右上角「Enter」"}</p>
+    </div>
+  `;
+  if (!currentUser) {
+    html += `<div class="empty">Waiting for the Echo</div>`;
+    return app.innerHTML = html;
+  }
+  const spaceIds = Object.keys(data.spaces);
+  html += '<div class="spaces">';
+  spaceIds.forEach(sid => {
+    const sp = data.spaces[sid];
+    const mode = getMode(currentUser, sid);
+    const roleText = mode === "owner" ? "我的空间"
+                   : mode === "x"     ? "MAKER 模式"
+                   :                    "访客模式";
+    const card = getSpaceCardColor(sid);
+    html += `
+      <div class="space-card" style="background:${hexToRgba(card.bg, 0.28)};border-color:${card.border};color:${card.text}" onclick="enterSpace('${sid}')">
+        <div class="icon">${sp.icon || "🌿"}</div>
+        <div class="name" style="color:${card.text}">${esc(sp.name || sid)}</div>
+        <div class="role" style="color:${card.text}">${roleText}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  app.innerHTML = html;
+}
+
+function renderSpaceOrFolder() {
+  const mode = getMode(currentUser, currentSpace);
+  const spaceData = data.spaces[currentSpace];
+  if (!spaceData) { currentSpace = null; return render(); }
+  const inFolder = !!currentFolderId;
+  const folder = inFolder ? spaceData.folders.find(f => f.id === currentFolderId) : null;
+  if (inFolder && !folder) { currentFolderId = null; return render(); }
+
+  const modeLabel = mode === "owner" ? "个人空间模式"
+                  : mode === "x"     ? "MAKER 模式"
+                  :                    "访客模式";
+
+  const title = inFolder ? `${SVG.folder} ${esc(folder.name)}` : `${spaceData.icon} ${esc(spaceData.name)}`;
+
+  let html = `
+    <div class="space-header">
+      <div class="title-row" style="width:100%">
+        <div>
+          <h2>${title}</h2>
+          ${!inFolder ? `<span class="mode-badge">${modeLabel}</span>` : ""}
+          ${inFolder ? `<span class="vis-badge ${VIS_LABEL[folder.visibility].cls}">${VIS_LABEL[folder.visibility].text}</span>` : ""}
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${inFolder && canManageFolder(folder) ? `<button onclick="openFolderEdit(${folder.id})">✏️ 管理</button>` : ""}
+          ${canAdd(mode) && !selectMode ? `<button onclick="enterSelectMode()">${SVG.check} 选择</button>` : ""}
+          ${selectMode ? `<button onclick="exitSelectMode()">取消选择</button>` : ""}
+          ${inFolder ? `<button onclick="exitFolder()">${SVG.back} 返回</button>` : `<button onclick="exitSpace()">${SVG.back} 返回</button>`}
+        </div>
+      </div>
+      <div class="breadcrumb">${renderBreadcrumb()}</div>
+    </div>
+  `;
+
+  if (!inFolder) {
+    html += renderCalendarModule(mode);
+  }
+
+  html += `
+    <div class="filters">
+      <input type="text" id="filterKw" placeholder="🔍 寻访…" value="${esc(filterKeyword)}" oninput="onFilterKeyword(this.value)">
+      ${!inFolder ? `
+        <div class="filter-row">
+          <span>日期</span>
+          <select onchange="onFilterDate(this.value)">
+            <option value="all"   ${filterDate==='all'   ? 'selected':''}>全部</option>
+            <option value="today" ${filterDate==='today' ? 'selected':''}>今天</option>
+            <option value="7d"    ${filterDate==='7d'    ? 'selected':''}>最近 7 天</option>
+            <option value="30d"   ${filterDate==='30d'   ? 'selected':''}>最近 30 天</option>
+            <option value="custom"${filterDate==='custom'? 'selected':''}>自定义</option>
+          </select>
+          ${filterDate === "custom" ? `
+            <input type="date" value="${filterDateFrom}" onchange="filterDateFrom=this.value;render()">
+            <span>～</span>
+            <input type="date" value="${filterDateTo}"   onchange="filterDateTo=this.value;render()">
+          ` : ""}
+        </div>
+      ` : ""}
+    </div>
+  `;
+
+  if (!inFolder && canAdd(mode)) {
+    const unreadCount = getUnreadNotificationCount();
+    const isDev = mode === "x";
+    html += `
+      <div class="tabs">
+        <div class="tab ${activeTab==='all'?'active':''}"      onclick="switchTab('all')">Sea-全部</div>
+        <div class="tab ${activeTab==='mine'?'active':''}"     onclick="switchTab('mine')">Rain-投递</div>
+        <div class="tab ${activeTab==='message'?'active':''}"  onclick="switchTab('message')">MESSAGE${unreadCount ? ` <span class="badge-count">${unreadCount}</span>` : ''}</div>
+        <div class="tab ${activeTab==='settings'?'active':''}" onclick="switchTab('settings')">设置</div>
+        ${isDev ? `<div class="tab ${activeTab==='dev'?'active':''}" onclick="switchTab('dev')">MAKER</div>` : ""}
+      </div>
+    `;
+  }
+
+  if (!inFolder && canAdd(mode)) {
+    if (activeTab === "message") { html += renderMessageTab(); app.innerHTML = html; return; }
+    if (activeTab === "settings") { html += renderSettingsTab(); app.innerHTML = html; return; }
+    if (activeTab === "dev" && mode === "x") { html += renderDevTab(); app.innerHTML = html; return; }
+  }
+
+  if (inFolder && canAdd(mode)) {
+    html += `
+      <div class="quick-add-row">
+        <button class="primary" onclick="openEdit(null)">${SVG.plus} 新增文件</button>
+        <button onclick="openFolderEdit(null)">${SVG.plus} 新建子文件夹</button>
+      </div>
+    `;
+  }
+
+  html += '<div class="desktop" id="desktop">' + renderDesktopHTML() + '</div>';
+
+  if (canAdd(mode) && !inFolder) {
+    html += `
+      <div class="add-row">
+        <div class="add" onclick="openEdit(null)">${SVG.plus} 新增文件</div>
+        <div class="add" onclick="openFolderEdit(null)">${SVG.plus} 新建文件夹</div>
+      </div>
+    `;
+  }
+
+  if (selectMode && selectedIds.size > 0) {
+    html += `
+      <div class="batch-bar">
+        <span>已选 ${selectedIds.size} 项</span>
+        <button onclick="batchMove()">移动</button>
+        <button class="danger" onclick="batchDelete()">删除</button>
+      </div>
+    `;
+  } else if (selectMode) {
+    html += `
+      <div class="batch-bar">
+        <span>点击卡片选择 · 已选 0 项</span>
+        <button onclick="exitSelectMode()">退出</button>
+      </div>
+    `;
+  }
+
+  app.innerHTML = html;
+}
+
+/* ---------- 日历 ---------- */
+function renderCalendarModule(mode) {
+  const sp = data.spaces[currentSpace];
+  const cal = sp.calendar || [];
+  const today = new Date();
+  const todayStr = fmtDate(today);
+  const todayHasRec = cal.some(r => r.date === todayStr);
+  const monthNames = ["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+
+  let html = `
+    <div class="calendar-module ${calExpanded ? 'expanded' : ''}">
+      <div class="cal-collapsed" onclick="toggleCalendar()">
+        <div class="cal-left">
+          ${SVG.calendar} ${calYear}年 ${monthNames[calMonth]}
+          ${todayHasRec ? '<span style="font-size:11px;opacity:.7">· 今天有记录</span>' : ''}
+        </div>
+        <div class="cal-toggle">${calExpanded ? '收起 ▲' : '展开 ▼'}</div>
+      </div>
+      <div class="cal-body">
+        <div class="cal-head">
+          <div class="cal-title">${calYear}年 ${monthNames[calMonth]}</div>
+          <div class="cal-nav">
+            <button onclick="event.stopPropagation();calPrev()">‹</button>
+            <button onclick="event.stopPropagation();calToday()">今天</button>
+            <button onclick="event.stopPropagation();calNext()">›</button>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+          <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div>
+          <div class="cal-dow">六</div>
+  `;
+
+  const year = calYear, month = calMonth;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const firstDow = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+
+  for (let i = 0; i < firstDow; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dStr = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const isToday = dStr === todayStr;
+    const hasRecord = cal.some(r => r.date === dStr);
+    html += `<div class="cal-day ${isToday?'today':''}" onclick="openCalDay('${dStr}')">${d}${hasRecord ? '<span class="dot"></span>' : ''}</div>`;
+  }
+  const totalCells = firstDow + daysInMonth;
+  const remain = (7 - totalCells % 7) % 7;
+  for (let i = 0; i < remain; i++) html += `<div class="cal-day other-month"></div>`;
+  html += `</div></div></div>`;
+  return html;
+}
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function toggleCalendar() { calExpanded = !calExpanded; render(); }
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } render(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } render(); }
+function calToday() { const d = new Date(); calYear = d.getFullYear(); calMonth = d.getMonth(); render(); }
+function openCalDay(dStr) {
+  calSelectedDate = dStr;
+  const sp = data.spaces[currentSpace];
+  const recs = (sp.calendar || []).filter(r => r.date === dStr).sort((a,b)=>b.time-a.time);
+  const mode = getMode(currentUser, currentSpace);
+  const editable = canAdd(mode);
+  const [y, m, d] = dStr.split("-");
+  document.getElementById("calDayTitle").textContent = `${y}年${Number(m)}月${Number(d)}日`;
+
+  let recHtml = "";
+  if (!recs.length) {
+    recHtml = `<div class="empty" style="padding:16px 0">Waiting for the Echo</div>`;
+  } else {
+    recs.forEach(r => {
+      const acc = data.accounts[r.author];
+      const authorName = acc ? displayName(r.author) : "已注销";
+      recHtml += `
+        <div class="cal-record" style="background:rgba(255,255,255,.5);border-radius:10px;padding:10px 14px;margin-bottom:8px;position:relative;border-left:3px solid #AE973C">
+          <div style="font-size:11px;opacity:.6;margin-bottom:4px">${esc(authorName)} · ${formatTime(r.time)}</div>
+          <div style="font-size:14px;white-space:pre-wrap;padding-right:40px">${esc(r.text)}</div>
+          ${(currentUser === r.author || mode === "x") ? `<button style="position:absolute;top:8px;right:8px;background:transparent;border:none;color:#ccc;font-size:16px;cursor:pointer" onclick="calDelRecord(${r.id})">✕</button>` : ""}
+        </div>
+      `;
+    });
+  }
+  document.getElementById("calRecords").innerHTML = recHtml;
+  document.getElementById("calAddBox").style.display = editable ? "" : "none";
+  document.getElementById("calAddBtn").style.display  = editable ? "" : "none";
+  openModal("calDayModal");
+}
+document.getElementById("calAddBtn").onclick = () => {
+  const text = document.getElementById("calNewRecord").value.trim();
+  if (!text) return alert("请输入内容");
+  const sp = data.spaces[currentSpace];
+  if (!sp.calendar) sp.calendar = [];
+  sp.calendar.push({ id: Date.now(), date: calSelectedDate, text, author: currentUser, time: Date.now() });
+  save();
+  document.getElementById("calNewRecord").value = "";
+  openCalDay(calSelectedDate);
+  render();
+};
+function calDelRecord(id) {
+  if (!confirm("确定删除这条记录？")) return;
+  const sp = data.spaces[currentSpace];
+  sp.calendar = (sp.calendar || []).filter(r => r.id !== id);
+  save();
+  openCalDay(calSelectedDate);
+  render();
+}
+
+/* ---------- MESSAGE ---------- */
+function renderMessageTab() {
+  const unread = getUnreadNotificationCount();
+  const showBingo = (messageSubTab === "notice");
+  let html = `
+    <div class="subtabs">
+      <div class="subtab ${messageSubTab==='received'?'active':''}" onclick="switchMessageSub('received')">收到的</div>
+      <div class="subtab ${messageSubTab==='sent'?'active':''}"     onclick="switchMessageSub('sent')">我发的</div>
+      <div class="subtab ${messageSubTab==='notice'?'active':''}"   onclick="switchMessageSub('notice')">通知</div>
+      ${showBingo ? `<div class="subtab-actions"><button class="bingo-btn" onclick="markAllNotificationsRead()" ${unread ? '' : 'disabled'}>Bingo</button></div>` : ''}
+    </div>
+  `;
+  if (messageSubTab === "received") html += renderReceivedMessages();
+  else if (messageSubTab === "sent") html += renderSentMessages();
+  else if (messageSubTab === "notice") html += renderNotifications();
+  return html;
+}
+function renderReceivedMessages() {
+  const spaceData = data.spaces[currentSpace];
+  const mode = getMode(currentUser, currentSpace);
+  const allComments = spaceData.comments.filter(c => !c.deleted && !c.replyTo);
+  let visible = allComments.filter(c => {
+    if (mode === "x") return true;
+    if (c.hiddenBy === "self") return false;
+    return true;
+  });
+  if (!visible.length) return `<div class="empty">Waiting for the Echo</div>`;
+  let html = '';
+  visible.forEach(c => {
+    const file = spaceData.files.find(f => f.id === c.fileId);
+    const fileName = file ? (file.title || "无标题") : "（已删除文件）";
+    const replies = spaceData.comments.filter(r => !r.deleted && r.replyTo === c.id);
+    html += `<div class="msg-card" onclick="jumpToComment(${c.fileId}, ${c.id})">
+      <div class="msg-head"><span class="msg-from">${esc(getCommentDisplayName(c))}</span><span>${formatTime(c.time)}</span></div>
+      <div class="msg-body">${esc(c.text)}</div>
+      <div class="msg-ref">📄 ${esc(fileName)} · 回复 ${replies.length} 条</div>
+    </div>`;
+  });
+  return html;
+}
+function renderSentMessages() {
+  let all = [];
+  Object.keys(data.spaces).forEach(sid => {
+    const sp = data.spaces[sid];
+    sp.comments.forEach(c => {
+      if (!c.deleted && c.author === currentUser) all.push({ ...c, _spaceId: sid });
+    });
+  });
+  all.sort((a, b) => b.time - a.time);
+  if (!all.length) return `<div class="empty">Waiting for the Echo</div>`;
+  let html = '';
+  all.forEach(c => {
+    const sp = data.spaces[c._spaceId];
+    const file = sp.files.find(f => f.id === c.fileId);
+    const fileName = file ? (file.title || "无标题") : "（已删除文件）";
+    html += `<div class="msg-card mine" onclick="jumpToCommentFromOtherSpace('${c._spaceId}', ${c.fileId}, ${c.id})">
+      <div class="msg-head"><span class="msg-from">我</span><span>${formatTime(c.time)}</span></div>
+      <div class="msg-body">${esc(c.text)}</div>
+      <div class="msg-ref">📁 ${esc(sp.name)} · 📄 ${esc(fileName)}</div>
+    </div>`;
+  });
+  return html;
+}
+function renderNotifications() {
+  const notices = getMyNotifications().sort((a, b) => b.time - a.time);
+  if (!notices.length) return `<div class="empty">Waiting for the Echo</div>`;
+  let html = '';
+  notices.forEach(n => {
+    const unread = !n.read;
+    html += `<div class="msg-card notification ${unread?'unread':''}" onclick="handleNoticeClick('${n.id}')">
+      <div class="msg-head"><span class="msg-from">${unread ? '<span class="unread-dot"></span>' : ''}🔔 通知</span><span>${formatTime(n.time)}</span></div>
+      <div class="msg-body">${esc(n.text)}</div>
+    </div>`;
+  });
+  return html;
+}
+function getCommentDisplayName(c) {
+  if (c.displayAs === "anonymous") return "隐名";
+  if (c.displayAs === "signed")    return c.signedName || "隐名";
+  return displayName(c.author);
+}
+function handleNoticeClick(noticeId) {
+  const sp = data.spaces[currentSpace];
+  const n = sp.notifications.find(x => String(x.id) === String(noticeId));
+  if (!n) return;
+  n.read = true;
+  save();
+  if (n.fileId) currentFileId = n.fileId;
+  render();
+}
+function jumpToComment(fileId, commentId) {
+  currentFileId = fileId;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById("comment-" + commentId);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+}
+function jumpToCommentFromOtherSpace(spaceId, fileId, commentId) {
+  currentSpace = spaceId; currentFolderId = null; currentFileId = fileId;
+  render();
+  setTimeout(() => {
+    const el = document.getElementById("comment-" + commentId);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 100);
+}
+
+/* ---------- 设置 ---------- */
+function renderSettingsTab() {
+  const sp = data.spaces[currentSpace];
+  const mode = getMode(currentUser, currentSpace);
+  if (mode !== "owner" && mode !== "x") return `<div class="empty">无权访问</div>`;
+
+  const iconOpts = SPACE_ICONS.map(ic =>
+    `<div class="icon-opt ${sp.icon===ic?'active':''}" onclick="setSpaceIcon('${ic}')">${ic}</div>`
+  ).join("");
+
+  const themeOpts = Object.keys(SPACE_THEMES).map(k => {
+    const t = SPACE_THEMES[k];
+    return `<div class="color-dot ${sp.theme===k?'active':''}" style="background:${t.bg}" title="${t.name}" onclick="setSpaceTheme('${k}')"></div>`;
+  }).join("");
+
+  const cardOpts = COLOR_CARDS.map((c, i) =>
+    `<div class="color-dot ${sp.cardColor===i?'active':''}" style="background:${c.bg}" onclick="setSpaceCardColor(${i})"></div>`
+  ).join("");
+
+  return `<div class="settings-panel">
+    <h3>⚙️ 空间设置</h3>
+    <div class="setting-item">
+      <label>空间名称</label>
+      <input type="text" id="setSpaceName" value="${esc(sp.name)}" maxlength="20" onfocus="scrollToInput(this)">
+    </div>
+    <div class="setting-item">
+      <label>空间图标</label>
+      <div class="icon-options">${iconOpts}</div>
+    </div>
+    <div class="setting-item">
+      <label>空间主题色（影响空间内背景）</label>
+      <div class="color-options">${themeOpts}</div>
+      <div class="hint-text">当前：${SPACE_THEMES[sp.theme]?.name || "绿"}</div>
+    </div>
+    <div class="setting-item">
+      <label>空间卡片颜色（首页显示）</label>
+      <div class="color-options">${cardOpts}</div>
+    </div>
+    <div class="setting-item">
+      <label>我的昵称（显示名）</label>
+      <input type="text" id="setNickname" value="${esc(getNickname(currentUser))}" maxlength="20" onfocus="scrollToInput(this)">
+    </div>
+    <div style="margin-top:20px">
+      <button class="primary" onclick="saveSettings()">保存设置</button>
+    </div>
+  </div>
+
+  <div class="settings-panel">
+    <h3>🔒 修改密码</h3>
+    <div class="setting-item">
+      <label>旧密码</label>
+      <input type="password" id="setOldPwd" placeholder="当前密码" onfocus="scrollToInput(this)">
+    </div>
+    <div class="setting-item">
+      <label>新密码</label>
+      <input type="password" id="setNewPwd" placeholder="新密码" onfocus="scrollToInput(this)">
+    </div>
+    <div class="setting-item">
+      <label>确认新密码</label>
+      <input type="password" id="setNewPwd2" placeholder="再输一次新密码" onfocus="scrollToInput(this)">
+    </div>
+    <div style="margin-top:20px">
+      <button class="primary" onclick="changePassword()">修改密码</button>
+    </div>
+  </div>`;
+}
+function switchTab(t) {
+  activeTab = t;
+  if (t === "message") messageSubTab = "received";
+  selectMode = false; selectedIds.clear();
+  render();
+}
+function switchMessageSub(sub) { messageSubTab = sub; render(); }
+function setSpaceIcon(ic) { data.spaces[currentSpace].icon = ic; save(); render(); }
+function setSpaceTheme(theme) { data.spaces[currentSpace].theme = theme; save(); render(); }
+function setSpaceCardColor(idx) { data.spaces[currentSpace].cardColor = idx; save(); render(); }
+function saveSettings() {
+  const sp = data.spaces[currentSpace];
+  const name = document.getElementById("setSpaceName").value.trim();
+  const nickname = document.getElementById("setNickname").value.trim();
+  if (!name) return alert("空间名不能为空");
+  if (!nickname) return alert("昵称不能为空");
+  sp.name = name;
+  data.accounts[currentUser].nickname = nickname;
+  save(); alert("已保存"); render();
+}
+function changePassword() {
+  const oldPwd = document.getElementById("setOldPwd").value;
+  const newPwd = document.getElementById("setNewPwd").value;
+  const newPwd2 = document.getElementById("setNewPwd2").value;
+  const acc = data.accounts[currentUser];
+  if (!acc) return;
+  if (acc.password !== oldPwd) return alert("旧密码错误");
+  if (!newPwd) return alert("新密码不能为空");
+  if (newPwd !== newPwd2) return alert("两次输入的新密码不一致");
+  acc.password = newPwd;
+  save(); alert("密码已修改");
+  document.getElementById("setOldPwd").value = "";
+  document.getElementById("setNewPwd").value = "";
+  document.getElementById("setNewPwd2").value = "";
+}
+
+/* ---------- MAKER ---------- */
+function renderDevTab() {
+  const iconOpts = SPACE_ICONS.map(ic => `<option value="${ic}">${ic}</option>`).join("");
+  return `<div class="dev-panel">
+    <h3>🛠 MAKER</h3>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">1. 首页设置</div>
+      <label style="font-size:12px;opacity:.7;display:block;margin-bottom:4px">首页标题</label>
+      <input type="text" id="devHomeTitle" value="${esc(data.home.title)}" style="width:100%" onfocus="scrollToInput(this)">
+      <label style="font-size:12px;opacity:.7;display:block;margin-top:10px;margin-bottom:4px">首页副标题</label>
+      <textarea id="devHomeSubtitle" style="width:100%;min-height:80px" onfocus="scrollToInput(this)">${esc(data.home.subtitle)}</textarea>
+      <button class="primary" style="margin-top:10px" onclick="devSaveHome()">保存首页</button>
+    </div>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">2. 新建空间和账号</div>
+      <input type="text" id="devNewAcc" placeholder="账号名（英文）" style="width:120px" onfocus="scrollToInput(this)">
+      <input type="text" id="devNewPwd" placeholder="密码" style="width:120px" onfocus="scrollToInput(this)">
+      <input type="text" id="devNewNick" placeholder="昵称" style="width:100px" onfocus="scrollToInput(this)">
+      <input type="text" id="devNewSpaceName" placeholder="空间名" style="width:120px" onfocus="scrollToInput(this)">
+      <select id="devNewIcon" style="width:80px">${iconOpts}</select>
+      <select id="devNewTheme" style="width:80px">
+        <option value="red">红</option><option value="blue">蓝</option>
+        <option value="green" selected>绿</option><option value="yellow">黄</option>
+      </select>
+      <button class="primary" onclick="devCreateSpaceAndAccount()">创建</button>
+    </div>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">3. 所有空间</div>
+      <table class="data-table">
+        <thead><tr><th>空间</th><th>图标</th><th>主人</th><th>文件夹</th><th>文件</th></tr></thead>
+        <tbody>
+          ${Object.keys(data.spaces).map(sid => {
+            const sp = data.spaces[sid];
+            const owner = Object.keys(data.accounts).find(u => data.accounts[u].owns === sid) || "—";
+            const fCount = (sp.folders||[]).filter(f=>!f.deleted).length;
+            const fileCount = (sp.files||[]).filter(f=>!f.deleted).length;
+            return `<tr><td>${esc(sp.name)}</td><td>${sp.icon}</td><td>${esc(owner)}</td><td>${fCount}</td><td>${fileCount}</td></tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">4. 所有账号</div>
+      <table class="data-table">
+        <thead><tr><th>账号</th><th>昵称</th><th>密码</th><th>角色</th><th>拥有空间</th><th>操作</th></tr></thead>
+        <tbody>
+          ${Object.keys(data.accounts).map(u => {
+            const a = data.accounts[u];
+            const roleText = a.role === "dev" ? "MAKER" : a.role === "owner" ? "空间主人" : "访客";
+            return `<tr>
+              <td>${esc(u)}</td><td>${esc(a.nickname || u)}</td><td>${esc(a.password)}</td>
+              <td>${roleText}</td><td>${a.owns || "—"}</td>
+              <td>
+                <button class="mini" onclick="devChangePwd('${u}')">改密码</button>
+                ${u !== "X" ? `<button class="mini" onclick="devDeleteAccount('${u}')">删除</button>` : ""}
+              </td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table>
+    </div>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">5. 公告 / 广播</div>
+      <textarea id="devBroadcastText" placeholder="输入要发送的内容…" style="min-height:80px;width:100%" onfocus="scrollToInput(this)"></textarea>
+      <div style="margin-top:8px">
+        <label style="font-size:13px;display:block;margin-bottom:6px">发送给：</label>
+        <label style="margin-right:14px"><input type="radio" name="broadcastTo" value="all" checked> 所有账号</label>
+        <label><input type="radio" name="broadcastTo" value="owners"> 只有空间主人</label>
+      </div>
+      <button class="primary" style="margin-top:10px" onclick="devBroadcast()">发送广播</button>
+    </div>
+    <div class="dev-section">
+      <div class="dev-title" style="font-weight:600;margin-bottom:12px">6. 数据导入 / 导出</div>
+      <button onclick="devExport()">📤 导出数据</button>
+      <label class="primary" style="display:inline-block;padding:6px 14px;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.18);color:#C5FCE0;border:1px solid rgba(213,250,241,.4);font-size:13px;margin-left:8px">
+        📥 导入数据
+        <input type="file" accept=".json" style="display:none" onchange="devImport(this)">
+      </label>
+    </div>
+    <div class="dev-section">
+      <div class="collapsible ${devCollapsed.reset ? '' : 'open'}" onclick="toggleDevSection('reset')">
+        <span class="arrow">▶</span><span>7. 高级操作</span>
+      </div>
+      <div class="collapsible-content ${devCollapsed.reset ? '' : 'open'}">
+        <div class="danger-zone">
+          <div class="warn">⚠️ 危险操作</div>
+          <button class="danger" onclick="openResetConfirm()">🗑 重置全部数据</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function toggleDevSection(key) { devCollapsed[key] = !devCollapsed[key]; render(); }
+function devSaveHome() {
+  data.home.title = document.getElementById("devHomeTitle").value.trim() || "Lucent · Rain · Surge";
+  data.home.subtitle = document.getElementById("devHomeSubtitle").value.trim() || "";
+  save(); alert("已保存"); render();
+}
+function devCreateSpaceAndAccount() {
+  const acc = document.getElementById("devNewAcc").value.trim();
+  const pwd = document.getElementById("devNewPwd").value.trim();
+  const nick = document.getElementById("devNewNick").value.trim() || acc;
+  const spName = document.getElementById("devNewSpaceName").value.trim() || (acc + "空间");
+  const icon = document.getElementById("devNewIcon").value;
+  const theme = document.getElementById("devNewTheme").value;
+  if (!acc) return alert("账号名不能为空");
+  if (!pwd) return alert("密码不能为空");
+  if (!/^[a-zA-Z0-9_]+$/.test(acc)) return alert("账号名只能英文数字下划线");
+  if (data.accounts[acc]) return alert("账号已存在");
+  if (data.spaces[acc.toUpperCase()]) return alert("空间ID冲突");
+  const spaceId = acc.toUpperCase();
+  const randCard = Math.floor(Math.random()*8);
+  data.accounts[acc] = { password: pwd, role: "owner", owns: spaceId, nickname: nick };
+  data.spaces[spaceId] = {
+    name: spName, icon: icon, theme: theme, cardColor: randCard,
+    folders: [], files: [], comments: [], notifications: [], calendar: []
+  };
+  save();
+  alert(`已创建账号 ${acc} 和空间 ${spaceId}`);
+  render();
+}
+function devChangePwd(user) {
+  const newPwd = prompt(`输入 ${user} 的新密码：`);
+  if (newPwd === null) return;
+  if (!newPwd.trim()) return alert("密码不能为空");
+  data.accounts[user].password = newPwd.trim();
+  save(); alert("已修改"); render();
+}
+function devDeleteAccount(user) {
+  if (user === "X") return alert("不能删除 MAKER 账号");
+  if (!confirm(`确定删除账号 ${user}？`)) return;
+  delete data.accounts[user];
+  save(); alert("已删除"); render();
+}
+function devBroadcast() {
+  const text = document.getElementById("devBroadcastText").value.trim();
+  if (!text) return alert("请输入广播内容");
+  const to = document.querySelector('input[name="broadcastTo"]:checked').value;
+  let targets = [];
+  if (to === "all") targets = Object.keys(data.accounts);
+  else targets = Object.keys(data.accounts).filter(u => data.accounts[u].role === "owner");
+  targets.forEach(u => {
+    pushNotification(u, { type: "broadcast", text: `📢 ${text}`, from: currentUser, fileId: null });
+  });
+  save(); alert(`已发送给 ${targets.length} 个账号`);
+  document.getElementById("devBroadcastText").value = "";
+}
+function devExport() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `lucent-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function devImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!confirm("导入会覆盖当前所有数据，确定继续？")) { input.value = ""; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.accounts || !imported.spaces) throw new Error("文件格式不对");
+      data = migrateData(imported);
+      save(); alert("导入成功");
+      currentSpace = null; currentFolderId = null; currentFileId = null;
+      render();
+    } catch (err) { alert("导入失败：" + err.message); }
+    input.value = "";
+  };
+  reader.readAsText(file);
+}
+function openResetConfirm() {
+  document.getElementById("inResetConfirm").value = "";
+  openModal("resetModal");
+}
+document.getElementById("doReset").onclick = () => {
+  const v = document.getElementById("inResetConfirm").value.trim();
+  if (v !== "RESET") return alert("请输入 RESET 以确认");
+  data = defaultData();
+  save();
+  localStorage.removeItem(LOGIN_KEY);
+  currentUser = null;
+  currentSpace = null; currentFolderId = null; currentFileId = null;
+  closeModal("resetModal");
+  alert("已重置");
+  render();
+};
+
+/* ---------- 面包屑 ---------- */
+function renderBreadcrumb() {
+  const sp = data.spaces[currentSpace];
+  const chain = getFolderChain(currentFolderId);
+  let html = `<a onclick="goToFolder(null)">${sp.icon} ${esc(sp.name)}</a>`;
+  chain.forEach(f => {
+    html += `<span class="sep">›</span><a onclick="goToFolder(${f.id})">${esc(f.name)}</a>`;
+  });
+  return html;
+}
+
+/* ---------- 桌面内容 ---------- */
+function renderDesktopHTML() {
+  const mode = getMode(currentUser, currentSpace);
+  const spaceData = data.spaces[currentSpace];
+  const searching = !!filterKeyword || filterDate !== "all";
+  const visibleFolders = spaceData.folders.filter(f => canSeeFolder(f, currentUser, mode));
+  let allFiles = spaceData.files.filter(f => !f.deleted);
+  if (!searching && canAdd(mode) && activeTab === "mine" && !currentFolderId) {
+    allFiles = allFiles.filter(f => f.author === currentUser);
+  }
+  let items = [];
+  if (currentFolderId) {
+    const subFolders = visibleFolders.filter(f => f.parentId === currentFolderId);
+    let files = allFiles.filter(f => f.folderId === currentFolderId);
+    files = filterFiles(files, mode);
+    items = subFolders.map(fo => ({ type: "folder", data: fo }))
+      .concat(files.map(f => ({ type: "file", data: f, showFolderTag: false })));
+  } else {
+    if (searching) {
+      let files = filterFiles(allFiles, mode);
+      items = files.map(f => {
+        const folder = f.folderId ? visibleFolders.find(fo => fo.id === f.folderId) : null;
+        const path = folder ? getFolderPath(folder) : "";
+        return { type: "file", data: f, showFolderTag: !!folder, folderName: path };
+      });
+      const matchedFolders = visibleFolders.filter(fo => {
+        if (!filterKeyword) return false;
+        return fo.name.toLowerCase().includes(filterKeyword.toLowerCase());
+      });
+      items = matchedFolders.map(fo => ({ type: "folder", data: fo })).concat(items);
+    } else {
+      const rootFolders = visibleFolders.filter(f => !f.parentId);
+      const looseFiles = filterFiles(allFiles.filter(f => !f.folderId), mode);
+      items = rootFolders.map(fo => ({ type: "folder", data: fo }))
+        .concat(looseFiles.map(f => ({ type: "file", data: f, showFolderTag: false })));
+    }
+  }
+  if (!items.length) {
+    return `<div class="empty" style="grid-column:1/-1">Waiting for the Echo</div>`;
+  }
+  return items.map(it => {
+    if (it.type === "folder") return renderFolderCard(it.data, mode);
+    return renderFileCard(it.data, it.showFolderTag, it.folderName || "");
+  }).join("");
+}
+function getFolderPath(folder) {
+  const chain = getFolderChain(folder.id);
+  return chain.map(f => f.name).join(" / ");
+}
+function renderFolderCard(fo, mode) {
+  const vis = VIS_LABEL[fo.visibility] || VIS_LABEL.public;
+  const spaceData = data.spaces[currentSpace];
+  const subCount = spaceData.folders.filter(f => !f.deleted && f.parentId === fo.id).length;
+  const fileCount = spaceData.files.filter(f => !f.deleted && f.folderId === fo.id).length;
+  const canManage = canManageFolder(fo);
+  let countText = [];
+  if (subCount > 0) countText.push(`${subCount} 个子文件夹`);
+  countText.push(`${fileCount} 个文件`);
+  const key = "folder:" + fo.id;
+  const selected = selectedIds.has(key);
+  const card = getSpaceCardColor(currentSpace);
+  const cls = card.type === "warm" ? "warm" : "cool";
+
+  return `
+    <div class="folder ${cls} ${selected?'selected':''}" onclick="handleCardClick(event, 'folder', ${fo.id})" oncontextmenu="handleCardRightClick(event, 'folder', ${fo.id})">
+      <div class="fname">${SVG.folder} ${esc(fo.name)}</div>
+      <div class="fmeta">
+        <span class="vis-badge ${vis.cls}">${vis.text}</span>
+        · ${countText.join("，")}<br>
+        <span style="opacity:.6">由 ${esc(displayName(fo.creator))} 创建</span>
+      </div>
+      ${canManage && !selectMode ? `<button class="edit-btn" onclick="event.stopPropagation();openFolderEdit(${fo.id})">✏️</button>` : ""}
+    </div>
+  `;
+}
+function renderFileCard(f, showFolderTag, folderName) {
+  const spaceData = data.spaces[currentSpace];
+  const commentCount = spaceData.comments.filter(c => !c.deleted && c.fileId === f.id).length;
+  const authorAcc = data.accounts[f.author];
+  const authorName = authorAcc ? displayName(f.author) : "已注销";
+  const imgs = f.imgs || [];
+  const firstImg = imgs[0] || "";
+  const imgCount = imgs.length;
+  const key = "file:" + f.id;
+  const selected = selectedIds.has(key);
+  const isLetter = f.type === "letter";
+  const typeIcon = isLetter ? "✍️" : "📝";
+  const card = getSpaceCardColor(currentSpace);
+  const cls = card.type === "warm" ? "warm" : "cool";
+
+  if (isLetter) {
+    const bg = f.letterBgColor || "#FEF8DA";
+    const previewText = (f.text || "").replace(/---/g, " ").slice(0, 100);
+    return `
+      <div class="file-card ${cls} ${selected?'selected':''}" onclick="handleCardClick(event, 'file', ${f.id})" oncontextmenu="handleCardRightClick(event, 'file', ${f.id})">
+        ${f.author === currentUser ? '<div class="mine-tag">我的</div>' : ""}
+        <div class="ftitle">${typeIcon} ${esc(f.title || "无标题")}</div>
+        <div class="letter-snippet" style="background:${hexToRgba(bg,0.5)}">${esc(previewText)}${previewText.length >= 100 ? "…" : ""}</div>
+        <div class="meta">
+          <span>✍️ ${esc(authorName)}</span>
+          <span>🕐 ${formatTime(f.updatedAt || f.time)}</span>
+          ${commentCount ? `<span>💬 ${commentCount}</span>` : ""}
+        </div>
+        ${showFolderTag ? `<div><span class="folder-tag">📁 ${esc(folderName)}</span></div>` : ""}
+      </div>
+    `;
+  }
+  return `
+    <div class="file-card ${cls} ${selected?'selected':''}" onclick="handleCardClick(event, 'file', ${f.id})" oncontextmenu="handleCardRightClick(event, 'file', ${f.id})">
+      ${firstImg ? `<img src="${firstImg}">` : ""}
+      ${imgCount > 1 ? `<div class="img-count-badge">📷 ${imgCount}</div>` : ""}
+      ${f.author === currentUser ? '<div class="mine-tag">我的</div>' : ""}
+      <div class="ftitle">${typeIcon} ${esc(f.title || "无标题")}</div>
+      ${f.text ? `<div class="text">${esc(f.text)}</div>` : ""}
+      <div class="meta">
+        <span>✍️ ${esc(authorName)}</span>
+        <span>🕐 ${formatTime(f.updatedAt || f.time)}</span>
+        ${commentCount ? `<span>💬 ${commentCount}</span>` : ""}
+      </div>
+      ${showFolderTag ? `<div><span class="folder-tag">📁 ${esc(folderName)}</span></div>` : ""}
+    </div>
+  `;
+}
+
+/* ---------- 卡片点击 ---------- */
+function handleCardClick(e, type, id) {
+  if (selectMode) { e.preventDefault(); toggleSelect(type, id); return; }
+  if (type === "folder") enterFolder(id); else openFile(id);
+}
+function handleCardRightClick(e, type, id) {
+  e.preventDefault();
+  if (selectMode) { toggleSelect(type, id); return; }
+  enterSelectMode(); toggleSelect(type, id);
+}
+
+let longPressTimer = null;
+document.addEventListener("touchstart", (e) => {
+  const card = e.target.closest(".folder, .file-card");
+  if (!card) return;
+  if (selectMode) return;
+  longPressTimer = setTimeout(() => {
+    const onclick = card.getAttribute("onclick") || "";
+    const m = onclick.match(/handleCardClick\(event, '(\w+)', (\d+)\)/);
+    if (m) { enterSelectMode(); toggleSelect(m[1], Number(m[2])); }
+  }, 500);
+}, { passive: true });
+document.addEventListener("touchend", () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+});
+document.addEventListener("touchmove", () => {
+  if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+}, { passive: true });
+
+function enterSelectMode() { selectMode = true; selectedIds.clear(); render(); }
+function exitSelectMode()  { selectMode = false; selectedIds.clear(); render(); }
+function toggleSelect(type, id) {
+  const key = type + ":" + id;
+  if (selectedIds.has(key)) selectedIds.delete(key); else selectedIds.add(key);
+  render();
+}
+
+function batchDelete() {
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  if (!confirm(`确定删除选中的 ${ids.length} 项？`)) return;
+  const spaceData = data.spaces[currentSpace];
+  const backup = { folders: [], files: [] };
+  ids.forEach(key => {
+    const [type, idStr] = key.split(":");
+    const id = Number(idStr);
+    if (type === "folder") {
+      const folder = spaceData.folders.find(f => f.id === id);
+      if (!folder) return;
+      const fids = new Set();
+      const collect = (fid) => {
+        fids.add(fid);
+        spaceData.folders.forEach(f => { if (f.parentId === fid && !f.deleted) collect(f.id); });
+      };
+      collect(id);
+      fids.forEach(fid => {
+        const fo = spaceData.folders.find(f => f.id === fid);
+        if (fo && !fo.deleted) { backup.folders.push({ ...fo }); fo.deleted = true; }
+        spaceData.files.forEach(f => {
+          if (f.folderId === fid && !f.deleted) { backup.files.push({ ...f }); f.deleted = true; }
+        });
+      });
+    } else if (type === "file") {
+      const f = spaceData.files.find(x => x.id === id);
+      if (f && !f.deleted) { backup.files.push({ ...f }); f.deleted = true; }
+    }
+  });
+  save(); exitSelectMode();
+  showUndoToast(`已删除 ${ids.length} 项`, () => {
+    backup.folders.forEach(bf => {
+      const target = spaceData.folders.find(f => f.id === bf.id);
+      if (target) Object.assign(target, bf); else spaceData.folders.push(bf);
+    });
+    backup.files.forEach(bf => {
+      const target = spaceData.files.find(f => f.id === bf.id);
+      if (target) Object.assign(target, bf); else spaceData.files.push(bf);
+    });
+    save(); render();
+  });
+}
+function batchMove() {
+  const ids = [...selectedIds];
+  if (!ids.length) return;
+  batchMoveIds = ids;
+  movingType = "batch";
+  movingId = null;
+  document.getElementById("moveTitle").textContent = `📦 批量移动 ${ids.length} 项到…`;
+  refreshMoveSelect(null, null);
+  resetInlineNewFolder();
+  openModal("moveModal");
+}
+
+/* ---------- 文件详情 ---------- */
+function renderDetail() {
+  const mode = getMode(currentUser, currentSpace);
+  const spaceData = data.spaces[currentSpace];
+  const f = spaceData.files.find(x => x.id === currentFileId);
+  if (!f) { currentFileId = null; return render(); }
+
+  if (f.type === "letter") {
+    renderLetterModal(f);
+    return;
+  }
+
+  const mine = canModifyFile(f);
+  const pages = splitIntoPages(f);
+  if (currentPage >= pages.length) currentPage = 0;
+  if (currentPage < 0) currentPage = 0;
+  const totalPages = pages.length;
+  const curPage = pages[currentPage] || { type: "empty" };
+
+  let html = `
+    <div class="detail-topbar">
+      <button class="mini-back-btn" onclick="closeFile()">${SVG.back} 返回</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${mine ? `
+          <div class="detail-topbar-actions">
+            <button class="mini" onclick="openEdit(${f.id})" title="编辑">${SVG.edit}</button>
+            <button class="mini" onclick="openMove(${f.id})" title="移动">${SVG.move}</button>
+            <button class="mini danger" onclick="delFile(${f.id})" title="删除">${SVG.trash}</button>
+          </div>
+        ` : ""}
+        <button class="mini comment-toggle-btn" onclick="toggleCommentDrawer()">${SVG.comment} 留言</button>
+      </div>
+    </div>
+    <div class="reader-split">
+      <div class="reader-left">
+        <div class="book-area">
+          <button class="book-nav-btn" onclick="pagePrev()" ${currentPage<=0?'disabled':''}>‹</button>
+          <div class="book-page-wrap">${renderBookPage(curPage, f, false)}</div>
+          <button class="book-nav-btn" onclick="pageNext()" ${currentPage>=totalPages-1?'disabled':''}>›</button>
+        </div>
+        <div class="page-indicator">${currentPage+1} / ${totalPages}</div>
+      </div>
+      <div class="reader-right">
+        <h1 class="reader-title">${esc(f.title || "无标题")}</h1>
+        <div class="reader-meta">✍️ ${esc(data.accounts[f.author] ? displayName(f.author) : "已注销")} · 🕐 ${formatTime(f.updatedAt || f.time)}</div>
+        <div class="reader-text">${esc(f.text || "")}</div>
+      </div>
+    </div>
+  `;
+  app.innerHTML = html;
+  renderCommentDrawer(f.id, mode);
+  attachPageSwipe();
+}
+function renderCommentDrawer(fileId, mode) {
+  const theme = getSpaceTheme(currentSpace);
+  const drawerBg = hexToRgba(theme.bg, 0.92);
+  const drawerHtml = `
+    <div class="comment-drawer-mask" id="commentDrawerMask" onclick="toggleCommentDrawer()"></div>
+    <div class="comment-drawer" id="commentDrawer" style="background:${drawerBg}">
+      <div class="comment-drawer-head">
+        <span>💬 留言</span>
+        <button class="mini" onclick="toggleCommentDrawer()">${SVG.close}</button>
+      </div>
+      <div class="comment-drawer-body">${renderCommentsSection(fileId, mode)}</div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", drawerHtml);
+}
+function toggleCommentDrawer() {
+  const drawer = document.getElementById("commentDrawer");
+  const mask = document.getElementById("commentDrawerMask");
+  if (!drawer) return;
+  drawer.classList.toggle("show");
+  mask.classList.toggle("show");
+}
+function renderLetterModal(f) {
+  const mode = getMode(currentUser, currentSpace);
+  const bg = f.letterBgColor || "#FEF8DA";
+  const theme = getSpaceTheme(currentSpace);
+  const commentsBg = hexToRgba(theme.bg, 0.85);
+  const html = `
+    <div class="letter-modal-mask show" id="letterModal">
+      <div class="letter-modal">
+        <div class="letter-modal-head">
+          <div class="letter-modal-title">✍️ ${esc(f.title || "无标题")}</div>
+          <button class="mini-back-btn" onclick="closeLetterModal()">${SVG.close}</button>
+        </div>
+        <div class="letter-modal-body">
+          <div class="letter-paper-full" style="background:${bg}">
+            <div>${esc(f.text || "")}</div>
+            ${f.letterDate ? `<div class="letter-paper-date">${esc(f.letterDate)}</div>` : ""}
+          </div>
+          <div class="letter-comments" style="background:${commentsBg}">${renderCommentsSection(f.id, mode)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", html);
+  document.body.style.overflow = "hidden";
+}
+function closeLetterModal() {
+  const modal = document.getElementById("letterModal");
+  if (modal) modal.remove();
+  document.body.style.overflow = "";
+  currentFileId = null;
+  render();
+}
+function splitIntoPages(f) {
+  const imgs = f.imgs || [];
+  const pages = [];
+  if (imgs.length === 0) {
+    const txt = (f.text || "").split(/\n---\n/).filter(s => s.trim().length > 0);
+    if (txt.length === 0) pages.push({ type: "image", img: "", text: "", isLast: true });
+    else txt.forEach((t, i) => pages.push({ type: "image", img: "", text: t.trim(), isLast: i === txt.length - 1 }));
+  } else {
+    imgs.forEach((src, i) => {
+      pages.push({ type: "image", img: src, text: i === 0 ? (f.text || "") : "", isLast: i === imgs.length - 1 });
+    });
+  }
+  return pages;
+}
+function renderBookPage(page, f, showTitle) {
+  return `
+    <div class="book-page">
+      <div class="book-page-inner image-page">
+        ${page.img ? `<img src="${page.img}">` : `<div style="flex:1;display:flex;align-items:center;justify-content:center;opacity:.4;font-size:14px">（无图片）</div>`}
+        ${page.text ? `<div class="page-text">${esc(page.text)}</div>` : ""}
+      </div>
+    </div>
+  `;
+}
+function pagePrev() { if (currentPage > 0) { currentPage--; render(); } }
+function pageNext() {
+  const spaceData = data.spaces[currentSpace];
+  const f = spaceData.files.find(x => x.id === currentFileId);
+  if (!f) return;
+  const pages = splitIntoPages(f);
+  if (currentPage < pages.length - 1) { currentPage++; render(); }
+}
+let swipeStartX = null;
+function attachPageSwipe() {
+  const area = document.querySelector(".book-page-wrap");
+  if (!area) return;
+  area.addEventListener("touchstart", (e) => { swipeStartX = e.touches[0].clientX; }, { passive: true });
+  area.addEventListener("touchend", (e) => {
+    if (swipeStartX === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStartX;
+    if (dx > 60) pagePrev();
+    else if (dx < -60) pageNext();
+    swipeStartX = null;
+  }, { passive: true });
+}
+
+/* ---------- 留言区 ---------- */
+function renderCommentsSection(fileId, mode) {
+  const spaceData = data.spaces[currentSpace];
+  const allComments = spaceData.comments.filter(c => c.fileId === fileId && !c.deleted);
+  const topComments = allComments.filter(c => !c.replyTo).sort((a,b)=>b.time-a.time);
+  const visibleTop = topComments.filter(c => canSeeComment(c, mode));
+  // 取当前空间主题色
+  const theme = getSpaceTheme(currentSpace);
+  const themeStyle = `background: ${hexToRgba(theme.bg, 0.25)}; border-color: ${hexToRgba(theme.accent, 0.4)}`;
+ let html = `<div class="comments-section" style="${themeStyle}">
+  <h3>💬 留言 <span class="count">${visibleTop.length} 条</span></h3>`;
+  html += `
+    <div class="comment-input-box">
+      <textarea id="newCommentText" placeholder="Call me by your NAME" onfocus="scrollToInput(this)"></textarea>
+      <div class="comment-input-actions">
+        <div class="identity-toggle">
+          <label><input type="radio" name="identity" value="real" checked> 留名（${esc(displayName(currentUser))}）</label>
+          <label><input type="radio" name="identity" value="anonymous"> 隐名</label>
+        </div>
+        <button class="primary" onclick="submitComment(${fileId})">发送</button>
+      </div>
+    </div>
+  `;
+  if (!visibleTop.length) {
+    html += `<div class="empty-comments">Waiting for the Echo</div>`;
+  } else {
+    html += '<div class="comment-list">';
+    visibleTop.forEach(c => {
+      const replies = allComments.filter(r => r.replyTo === c.id).sort((a,b)=>a.time-b.time).filter(r => canSeeComment(r, mode));
+      const cls = c.hiddenBy === "owner" ? "hidden-by-owner" : c.hiddenBy === "self" ? "hidden-by-self" : "";
+      html += `<div class="comment ${cls}" id="comment-${c.id}">`;
+      html += renderCommentBody(c, mode, false, fileId);
+      if (replies.length) {
+        html += '<div class="replies">' + replies.map(r => `<div class="reply" id="comment-${r.id}">${renderCommentBody(r, mode, false, fileId)}</div>`).join("") + '</div>';
+      }
+      if (canReplyComment(mode)) {
+        html += `
+          <div class="reply-input" id="reply-input-${c.id}">
+            <textarea id="reply-text-${c.id}" placeholder="Echo Back…"></textarea>
+            <div class="row">
+              <button onclick="cancelReply(${c.id})">取消</button>
+              <button class="primary" onclick="submitReply(${c.id}, ${fileId})">Echo Back-回复</button>
+            </div>
+          </div>
+        `;
+      }
+      html += `</div>`;
+    });
+    html += '</div>';
+  }
+  html += `</div>`;
+  return html;
+}
+function renderCommentBody(c, mode, inReceived, fileId) {
+  let displayNameStr = getCommentDisplayName(c);
+  const acc = data.accounts[c.author];
+  const isOwner = acc && acc.role === "owner";
+  const isDev = acc && acc.role === "dev";
+  let roleTag = "";
+  if (isOwner) roleTag = '<span class="badge">主人</span>';
+  else if (isDev) roleTag = '<span class="badge">MAKER</span>';
+  let hiddenTag = "";
+  if (c.hiddenBy === "owner") hiddenTag = '<span class="badge badge-hidden">被主人隐藏</span>';
+  if (c.hiddenBy === "self")  hiddenTag = '<span class="badge badge-hidden">自己隐藏</span>';
+  let html = `
+    <div class="comment-head">
+      <span class="who ${isOwner || isDev ? 'op' : ''}">${esc(displayNameStr)}</span>
+      ${roleTag}${hiddenTag}
+      <span class="time">${formatTime(c.time)}</span>
+    </div>
+    <div class="comment-text">${esc(c.text)}</div>
+  `;
+  let actions = [];
+  if (!inReceived && canReplyComment(mode) && !c.replyTo) {
+    actions.push(`<button class="mini" onclick="showReplyInput(${c.id})">Echo Back</button>`);
+  }
+  if (!inReceived) {
+    const canHideAny = canHideAnyComment(mode);
+    const isMine = c.author === currentUser;
+    const alreadyHidden = !!c.hiddenBy;
+    if (!alreadyHidden) {
+      if (canHideAny && !isMine) actions.push(`<button class="mini" onclick="hideComment(${c.id}, 'owner')">隐藏</button>`);
+      else if (isMine) actions.push(`<button class="mini" onclick="hideComment(${c.id}, 'self')">隐藏</button>`);
+    } else {
+      if (canHideAny && c.hiddenBy === "owner") actions.push(`<button class="mini" onclick="unhideComment(${c.id})">取消隐藏</button>`);
+      else if (isMine && c.hiddenBy === "self") actions.push(`<button class="mini" onclick="unhideComment(${c.id})">取消隐藏</button>`);
+    }
+  }
+  if (canDeleteComment(c)) actions.push(`<button class="mini" onclick="deleteComment(${c.id})">删除</button>`);
+  if (actions.length) html += `<div class="comment-actions">${actions.join("")}</div>`;
+  return html;
+}
+function canSeeComment(c, mode) {
+  if (c.deleted) return false;
+  if (mode === "x") return true;
+  if (!c.hiddenBy) return true;
+  if (c.hiddenBy === "owner") {
+    if (mode === "owner") return true;
+    if (c.author === currentUser) return true;
+    return false;
+  }
+  if (c.hiddenBy === "self") {
+    if (c.author === currentUser) return true;
+    return false;
+  }
+  return true;
+}
+
+/* ---------- 工具 ---------- */
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+function formatTime(t) {
+  const d = new Date(t);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function onFilterKeyword(v) { filterKeyword = v; refreshDesktopOnly(); }
+function refreshDesktopOnly() {
+  const el = document.getElementById("desktop");
+  if (!el) return;
+  el.innerHTML = renderDesktopHTML();
+}
+function onFilterDate(v) { filterDate = v; render(); }
+function scrollToInput(el) {
+  if (!el) return;
+  if (window.innerWidth > 767) return;
+  setTimeout(() => { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 300);
+}
+function filterFiles(files, mode) {
+  return files
+    .filter(f => !f.deleted)
+    .filter(f => {
+      if (filterKeyword) {
+        const kw = filterKeyword.toLowerCase();
+        const inTitle = (f.title || "").toLowerCase().includes(kw);
+        const inText  = (f.text  || "").toLowerCase().includes(kw);
+        if (!inTitle && !inText) return false;
+      }
+      if (filterDate !== "all") {
+        const t = f.updatedAt || f.time;
+        const now = Date.now();
+        if (filterDate === "today") {
+          const d = new Date(t), n = new Date();
+          if (d.toDateString() !== n.toDateString()) return false;
+        } else if (filterDate === "7d") { if (now - t > 7 * 86400000) return false; }
+        else if (filterDate === "30d") { if (now - t > 30 * 86400000) return false; }
+        else if (filterDate === "custom") {
+          if (filterDateFrom && t < new Date(filterDateFrom).getTime()) return false;
+          if (filterDateTo   && t > new Date(filterDateTo).getTime() + 86400000) return false;
+        }
+      }
+      return true;
+    })
+    .sort((a, b) => (b.updatedAt || b.time) - (a.updatedAt || a.time));
+}
+
+/* ============================================================
+   留言
+   ============================================================ */
+function submitComment(fileId) {
+  const ta = document.getElementById("newCommentText");
+  const text = ta.value.trim();
+  if (!text) return alert("请输入内容");
+  const identity = document.querySelector('input[name="identity"]:checked').value;
+  const spaceData = data.spaces[currentSpace];
+  const newId = Date.now();
+  spaceData.comments.push({
+    id: newId, fileId, author: currentUser,
+    displayAs: identity, signedName: "", text,
+    time: Date.now(), replyTo: null, hiddenBy: null, deleted: false
+  });
+  const file = spaceData.files.find(f => f.id === fileId);
+  const fileName = file ? (file.title || "无标题") : "文件";
+  const commenterName = identity === "anonymous" ? "有人" : displayName(currentUser);
+  const ownerAcc = Object.keys(data.accounts).find(u => data.accounts[u].owns === currentSpace);
+  const notifyTargets = new Set();
+  if (ownerAcc && ownerAcc !== currentUser) notifyTargets.add(ownerAcc);
+  if (currentUser !== "X" && data.accounts["X"]) notifyTargets.add("X");
+  notifyTargets.forEach(target => {
+    pushNotification(target, {
+      type: "new-comment", from: currentUser,
+      commentId: newId, fileId: fileId,
+      text: `${commenterName} 在「${fileName}」留下了新留言`,
+      spaceId: currentSpace
+    });
+  });
+  save();
+  refreshCommentArea(fileId);
+}
+function refreshCommentArea(fileId) {
+  const mode = getMode(currentUser, currentSpace);
+  const newHtml = renderCommentsSection(fileId, mode);
+  const drawerBody = document.querySelector(".comment-drawer-body");
+  if (drawerBody) drawerBody.innerHTML = newHtml;
+  const letterComments = document.querySelector(".letter-comments");
+  if (letterComments) letterComments.innerHTML = newHtml;
+}
+function showReplyInput(commentId) {
+  document.querySelectorAll(".reply-input.show").forEach(el => el.classList.remove("show"));
+  const box = document.getElementById("reply-input-" + commentId);
+  if (box) {
+    box.classList.add("show");
+    const ta = document.getElementById("reply-text-" + commentId);
+    if (ta) { ta.focus(); scrollToInput(ta); }
+  }
+}
+function cancelReply(commentId) {
+  const box = document.getElementById("reply-input-" + commentId);
+  if (box) box.classList.remove("show");
+}
+function submitReply(parentId, fileId) {
+  const ta = document.getElementById("reply-text-" + parentId);
+  const text = ta.value.trim();
+  if (!text) return alert("请输入内容");
+  const spaceData = data.spaces[currentSpace];
+  const replyId = Date.now();
+  spaceData.comments.push({
+    id: replyId, fileId, author: currentUser,
+    displayAs: "real", signedName: "", text,
+    time: Date.now(), replyTo: parentId, hiddenBy: null, deleted: false
+  });
+  const parent = spaceData.comments.find(c => c.id === parentId);
+  if (parent && parent.author !== currentUser) {
+    pushNotification(parent.author, {
+      type: "reply", from: currentUser,
+      commentId: parentId, fileId,
+      text: `${displayName(currentUser)} 回复了你的留言`,
+      spaceId: currentSpace
+    });
+  }
+  save();
+  refreshCommentArea(fileId);
+}
+function hideComment(id, by) {
+  const spaceData = data.spaces[currentSpace];
+  const c = spaceData.comments.find(x => x.id === id);
+  if (!c) return;
+  c.hiddenBy = by;
+  if (by === "owner" && c.author !== currentUser) {
+    pushNotification(c.author, {
+      type: "comment-hidden", from: currentUser,
+      commentId: id, fileId: c.fileId,
+      text: `编辑隐藏了你的留言`,
+      spaceId: currentSpace
+    });
+  }
+  const fid = c.fileId;
+  save();
+  refreshCommentArea(fid);
+}
+function unhideComment(id) {
+  const spaceData = data.spaces[currentSpace];
+  const c = spaceData.comments.find(x => x.id === id);
+  if (!c) return;
+  c.hiddenBy = null;
+  const fid = c.fileId;
+  save();
+  refreshCommentArea(fid);
+}
+function deleteComment(id) {
+  const spaceData = data.spaces[currentSpace];
+  const c = spaceData.comments.find(x => x.id === id);
+  if (!c) return;
+  if (!canDeleteComment(c)) return alert("只能删除自己的留言");
+  if (!confirm("确定删除这条留言？")) return;
+  const fid = c.fileId;
+  c.deleted = true;
+  save();
+  refreshCommentArea(fid);
+}
+
+/* ============================================================
+   导航
+   ============================================================ */
+function enterSpace(id) {
+  currentSpace = id;
+  activeTab = "all";
+  messageSubTab = "received";
+  currentFolderId = null; currentFileId = null; currentPage = 0;
+  filterKeyword = ""; filterDate = "all"; filterDateFrom = ""; filterDateTo = "";
+  unlockedFolders.clear();
+  selectMode = false; selectedIds.clear();
+  calExpanded = false;
+  const d = new Date();
+  calYear = d.getFullYear(); calMonth = d.getMonth();
+  render();
+}
+function exitSpace() {
+  currentSpace = null; currentFolderId = null; currentFileId = null;
+  selectMode = false; selectedIds.clear();
+  render();
+}
+function enterFolder(id) {
+  const mode = getMode(currentUser, currentSpace);
+  const folder = data.spaces[currentSpace].folders.find(f => f.id === id);
+  if (!folder) return;
+  if (folder.visibility === "password" && currentUser !== folder.creator && mode !== "x" && !unlockedFolders.has(folder.id)) {
+    const chain = getFolderChain(folder.id);
+    const parentUnlocked = chain.some(f => f.id !== folder.id && unlockedFolders.has(f.id));
+    if (!parentUnlocked) {
+      pendingFolderId = id;
+      document.getElementById("pwdFolderName").textContent = "📁 " + folder.name;
+      document.getElementById("inUnlockPwd").value = "";
+      openModal("pwdModal");
+      return;
+    }
+  }
+  currentFolderId = id;
+  filterKeyword = "";
+  selectMode = false; selectedIds.clear();
+  render();
+}
+function goToFolder(id) {
+  currentFolderId = id || null; filterKeyword = "";
+  selectMode = false; selectedIds.clear();
+  render();
+}
+function exitFolder() {
+  currentFolderId = null; filterKeyword = "";
+  selectMode = false; selectedIds.clear();
+  render();
+}
+function openFile(id) { currentFileId = id; currentPage = 0; render(); }
+function closeFile()  { currentFileId = null; currentPage = 0; render(); }
+
+/* ============================================================
+   登录 / 退出
+   ============================================================ */
+function openModal(id)  { document.getElementById(id).classList.add("show"); }
+function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+
+document.getElementById("loginBtn").onclick = () => openModal("loginModal");
+document.getElementById("doLogin").onclick = () => {
+  const u = document.getElementById("inUser").value.trim();
+  const p = document.getElementById("inPass").value;
+  const acc = data.accounts[u];
+  if (acc && acc.password === p) {
+    currentUser = u;
+    localStorage.setItem(LOGIN_KEY, u);
+    document.getElementById("inUser").value = "";
+    document.getElementById("inPass").value = "";
+    closeModal("loginModal");
+    currentSpace = null; currentFolderId = null; currentFileId = null;
+    unlockedFolders.clear();
+    selectMode = false; selectedIds.clear();
+    render();
+  } else alert("账号或密码错误");
+};
+document.getElementById("logoutBtn").onclick = () => {
+  currentUser = null;
+  localStorage.removeItem(LOGIN_KEY);
+  currentSpace = null; currentFolderId = null; currentFileId = null;
+  unlockedFolders.clear();
+  selectMode = false; selectedIds.clear();
+  render();
+};
+
+let pendingFolderId = null;
+document.getElementById("doUnlock").onclick = () => {
+  const pwd = document.getElementById("inUnlockPwd").value;
+  const folder = data.spaces[currentSpace].folders.find(f => f.id === pendingFolderId);
+  if (!folder) return;
+  if (folder.password === pwd) {
+    const chain = getFolderChain(folder.id);
+    chain.forEach(f => unlockedFolders.add(f.id));
+    closeModal("pwdModal");
+    currentFolderId = pendingFolderId;
+    filterKeyword = "";
+    render();
+  } else alert("密码错误");
+};
+
+/* ============================================================
+   新增 / 编辑 文件
+   ============================================================ */
+function openEdit(id) {
+  editingId = id;
+  pendingImgs = [];
+  pendingType = "image";
+  pendingLetter = { bgColor: "#FEF8DA" };
+  document.getElementById("inImg").value = "";
+  const spaceData = data.spaces[currentSpace];
+  const mode = getMode(currentUser, currentSpace);
+  const folders = spaceData.folders.filter(f => canSeeFolder(f, currentUser, mode));
+  const sel = document.getElementById("inFolder");
+  sel.innerHTML = '<option value="">（不放入文件夹）</option>' +
+    folders.map(f => `<option value="${f.id}">${esc(getFolderPath(f))}</option>`).join("");
+
+  if (id === null) {
+    document.getElementById("editTitle").textContent = "新增文件";
+    document.getElementById("inTitle").value = "";
+    document.getElementById("inText").value = "";
+    document.getElementById("inLetterText").value = "";
+    document.getElementById("inLetterDate").value = fmtDateCn(new Date());
+    setPendingType("image");
+    if (currentFolderId) sel.value = String(currentFolderId);
+  } else {
+    const f = spaceData.files.find(x => x.id === id);
+    if (!canModifyFile(f)) return alert("只有作者本人能编辑");
+    document.getElementById("editTitle").textContent = "编辑文件";
+    document.getElementById("inTitle").value = f.title || "";
+    if (f.type === "letter") {
+      setPendingType("letter");
+      document.getElementById("inLetterText").value = f.text || "";
+      document.getElementById("inLetterDate").value = f.letterDate || "";
+      pendingLetter.bgColor = f.letterBgColor || "#FEF8DA";
+      updateLetterUI();
+    } else {
+      setPendingType("image");
+      document.getElementById("inText").value = f.text || "";
+      pendingImgs = (f.imgs || []).slice();
+      renderImgUploader();
+    }
+    sel.value = f.folderId ? String(f.folderId) : "";
+  }
+  openModal("editModal");
+}
+function fmtDateCn(d) {
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+function setPendingType(t) {
+  pendingType = t;
+  document.querySelectorAll("#typePicker .type-opt").forEach(el => {
+    el.classList.toggle("active", el.dataset.type === t);
+  });
+  document.getElementById("imageFields").style.display = (t === "image") ? "" : "none";
+  document.getElementById("letterFields").style.display = (t === "letter") ? "" : "none";
+  if (t === "image") renderImgUploader(); else updateLetterUI();
+}
+document.querySelectorAll("#typePicker .type-opt").forEach(el => {
+  el.onclick = () => {
+    if (editingId !== null) return alert("编辑时不能改类型");
+    setPendingType(el.dataset.type);
+  };
+});
+function renderImgUploader() {
+  const box = document.getElementById("imgUploader");
+  let html = "";
+  pendingImgs.forEach((src, i) => {
+    html += `<div class="img-thumb"><img src="${src}"><button class="remove-btn" onclick="removePendingImg(${i})">✕</button></div>`;
+  });
+  if (pendingImgs.length < 9) {
+    html += `<div class="add-img-btn" onclick="document.getElementById('inImg').click()">＋</div>`;
+  }
+  box.innerHTML = html;
+}
+function removePendingImg(i) { pendingImgs.splice(i, 1); renderImgUploader(); }
+document.getElementById("inImg").onchange = e => {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  let remaining = 9 - pendingImgs.length;
+  files.slice(0, remaining).forEach(file => {
+    const r = new FileReader();
+    r.onload = ev => { pendingImgs.push(ev.target.result); renderImgUploader(); };
+    r.readAsDataURL(file);
+  });
+  e.target.value = "";
+};
+document.querySelectorAll("#bgcolorOptions .bgcolor-dot").forEach(el => {
+  el.onclick = () => {
+    pendingLetter.bgColor = el.dataset.color;
+    document.querySelectorAll("#bgcolorOptions .bgcolor-dot").forEach(d => d.classList.remove("active"));
+    el.classList.add("active");
+    updateLetterUI();
+  };
+});
+function updateLetterUI() {
+  document.querySelectorAll("#bgcolorOptions .bgcolor-dot").forEach(d => {
+    d.classList.toggle("active", d.dataset.color === pendingLetter.bgColor);
+  });
+  updateLetterPreview();
+}
+function updateLetterPreview() {
+  const el = document.getElementById("letterPreview");
+  if (!el) return;
+  el.style.background = pendingLetter.bgColor;
+  const txt = document.getElementById("inLetterText").value || "信件预览会显示在这里";
+  el.textContent = txt;
+}
+document.getElementById("inLetterText").addEventListener("input", updateLetterPreview);
+
+document.getElementById("saveEdit").onclick = () => {
+  const title = document.getElementById("inTitle").value.trim();
+  const folderVal = document.getElementById("inFolder").value;
+  const folderId = folderVal ? Number(folderVal) : null;
+  const spaceData = data.spaces[currentSpace];
+
+  if (pendingType === "letter") {
+    const text = document.getElementById("inLetterText").value.trim();
+    const dateStr = document.getElementById("inLetterDate").value.trim();
+    if (!text) return alert("请填写正文");
+    if (editingId === null) {
+      spaceData.files.push({
+        id: Date.now(), type: "letter", title, text, letterDate: dateStr,
+        letterBgColor: pendingLetter.bgColor, author: currentUser, folderId,
+        time: Date.now(), updatedAt: Date.now(), deleted: false, history: []
+      });
+    } else {
+      const f = spaceData.files.find(x => x.id === editingId);
+      if (!canModifyFile(f)) return alert("只有作者本人能编辑");
+      f.title = title; f.text = text; f.letterDate = dateStr;
+      f.letterBgColor = pendingLetter.bgColor; f.folderId = folderId;
+      f.updatedAt = Date.now();
+    }
+  } else {
+    const text = document.getElementById("inText").value.trim();
+    if (!title && !text && !pendingImgs.length) return alert("请至少填写一项");
+    if (editingId === null) {
+      spaceData.files.push({
+        id: Date.now(), type: "image", title, imgs: pendingImgs.slice(), text,
+        author: currentUser, folderId,
+        time: Date.now(), updatedAt: Date.now(), deleted: false, history: []
+      });
+    } else {
+      const f = spaceData.files.find(x => x.id === editingId);
+      if (!canModifyFile(f)) return alert("只有作者本人能编辑");
+      f.title = title; f.text = text; f.folderId = folderId;
+      f.imgs = pendingImgs.slice();
+      f.updatedAt = Date.now();
+    }
+  }
+  save(); closeModal("editModal");
+  currentFileId = null; currentPage = 0;
+  render();
+};
+function delFile(id) {
+  const spaceData = data.spaces[currentSpace];
+  const f = spaceData.files.find(x => x.id === id);
+  if (!canModifyFile(f)) return alert("只有作者本人能删除");
+  if (!confirm("确定删除这个文件？")) return;
+  const backup = { ...f };
+  f.deleted = true;
+  save(); currentFileId = null; currentPage = 0;
+  const fileName = f.title || "无标题";
+  showUndoToast(`已删除「${fileName}」`, () => {
+    const target = spaceData.files.find(x => x.id === backup.id);
+    if (target) Object.assign(target, backup);
+    save(); render();
+  });
+  render();
+}
+
+/* ============================================================
+   移动
+   ============================================================ */
+let movingType = null;
+let movingId = null;
+let inlineVis = "public";
+
+function openMove(id) {
+  movingType = "file"; movingId = id;
+  const spaceData = data.spaces[currentSpace];
+  const f = spaceData.files.find(x => x.id === id);
+  if (!f || !canModifyFile(f)) return alert("只有作者本人能移动");
+  document.getElementById("moveTitle").textContent = "📦 移动文件到…";
+  refreshMoveSelect(f.folderId, null);
+  resetInlineNewFolder();
+  openModal("moveModal");
+}
+function openMoveFolderFromManage() {
+  const folder = data.spaces[currentSpace].folders.find(f => f.id === editingFolderId);
+  if (!folder) return;
+  movingType = "folder"; movingId = editingFolderId;
+  closeModal("folderModal");
+  document.getElementById("moveTitle").textContent = "📦 移动文件夹到…";
+  refreshMoveSelect(folder.parentId, folder.id);
+  resetInlineNewFolder();
+  openModal("moveModal");
+}
+function resetInlineNewFolder() {
+  document.getElementById("inlineNewFolder").style.display = "none";
+  document.getElementById("inlineFolderName").value = "";
+  document.getElementById("inlineFolderPwd").value = "";
+  document.getElementById("inlinePwdWrap").style.display = "none";
+  inlineVis = "public";
+  setInlineVis("public");
+}
+function refreshMoveSelect(selectedId, excludeFolderId) {
+  const spaceData = data.spaces[currentSpace];
+  const mode = getMode(currentUser, currentSpace);
+  let folders = spaceData.folders.filter(fo => canSeeFolder(fo, currentUser, mode));
+  if (excludeFolderId !== null && excludeFolderId !== undefined) {
+    folders = folders.filter(fo => fo.id !== excludeFolderId && !isDescendant(fo, excludeFolderId));
+  }
+  const sel = document.getElementById("moveTarget");
+  sel.innerHTML = '<option value="">（不放入文件夹 / 散落）</option>' +
+    folders.map(fo => `<option value="${fo.id}">${esc(getFolderPath(fo))}</option>`).join("");
+  sel.value = selectedId ? String(selectedId) : "";
+}
+function toggleInlineNewFolder() {
+  const box = document.getElementById("inlineNewFolder");
+  box.style.display = (box.style.display === "none") ? "" : "none";
+}
+function setInlineVis(v) {
+  inlineVis = v;
+  document.querySelectorAll("#inlineVisOptions .vis-opt").forEach(el => {
+    el.classList.toggle("active", el.dataset.vis === v);
+  });
+  document.getElementById("inlinePwdWrap").style.display = (v === "password") ? "" : "none";
+}
+document.querySelectorAll("#inlineVisOptions .vis-opt").forEach(el => {
+  el.onclick = () => setInlineVis(el.dataset.vis);
+});
+function createInlineFolder() {
+  const name = document.getElementById("inlineFolderName").value.trim();
+  if (!name) return alert("请填写文件夹名称");
+  const targetVal = document.getElementById("moveTarget").value;
+  const parentId = targetVal ? Number(targetVal) : null;
+  const parentVis = getInheritConstraint(parentId);
+  if (parentVis && !isVisAllowed(inlineVis, parentVis)) return alert(`子文件夹不能比父文件夹更开放`);
+  let pwd = "";
+  if (inlineVis === "password") {
+    pwd = document.getElementById("inlineFolderPwd").value.trim();
+    if (!pwd) return alert("密码文件夹需要设置密码");
+  }
+  const spaceData = data.spaces[currentSpace];
+  const newId = Date.now();
+  spaceData.folders.push({
+    id: newId, name, visibility: inlineVis, password: pwd,
+    creator: currentUser, parentId: parentId,
+    time: Date.now(), deleted: false, history: []
+  });
+  save();
+  refreshMoveSelect(newId, movingType === "folder" ? movingId : null);
+  resetInlineNewFolder();
+}
+document.getElementById("doMove").onclick = () => {
+  const val = document.getElementById("moveTarget").value;
+  const targetId = val ? Number(val) : null;
+  const spaceData = data.spaces[currentSpace];
+  if (movingType === "file") {
+    const f = spaceData.files.find(x => x.id === movingId);
+    if (!f) return;
+    f.folderId = targetId; f.updatedAt = Date.now();
+    save(); closeModal("moveModal"); currentFileId = null; render();
+  } else if (movingType === "folder") {
+    const folder = spaceData.folders.find(f => f.id === movingId);
+    if (!folder) return;
+    if (targetId === movingId) return alert("不能移到自己里面");
+    if (targetId && isDescendant(spaceData.folders.find(f => f.id === targetId), movingId))
+      return alert("不能移进自己的子文件夹");
+    folder.parentId = targetId;
+    save(); closeModal("moveModal"); render();
+  } else if (movingType === "batch") {
+    batchMoveIds.forEach(key => {
+      const [type, idStr] = key.split(":");
+      const id = Number(idStr);
+      if (type === "file") {
+        const f = spaceData.files.find(x => x.id === id);
+        if (f) { f.folderId = targetId; f.updatedAt = Date.now(); }
+      } else if (type === "folder") {
+        const folder = spaceData.folders.find(x => x.id === id);
+        if (folder && id !== targetId && !(targetId && isDescendant(spaceData.folders.find(f => f.id === targetId), id))) {
+          folder.parentId = targetId;
+        }
+      }
+    });
+    save(); closeModal("moveModal");
+    batchMoveIds = [];
+    exitSelectMode();
+  }
+};
+
+/* ============================================================
+   文件夹 新建 / 编辑 / 删除
+   ============================================================ */
+function openFolderEdit(id) {
+  editingFolderId = id;
+  pendingVis = "public";
+  document.getElementById("inFolderName").value = "";
+  document.getElementById("inFolderPwd").value = "";
+  document.getElementById("pwdWrap").style.display = "none";
+  setVis("public");
+  document.getElementById("folderManageZone").style.display = "none";
+  document.getElementById("folderParentInfo").style.display = "none";
+  document.querySelectorAll("#visOptions .vis-opt").forEach(el => el.classList.remove("disabled"));
+  if (id !== null) {
+    const folder = data.spaces[currentSpace].folders.find(f => f.id === id);
+    if (!folder || !canManageFolder(folder)) return alert("只有创建者能管理文件夹");
+    document.getElementById("folderTitle").textContent = "管理文件夹";
+    document.getElementById("inFolderName").value = folder.name;
+    setVis(folder.visibility);
+    if (folder.visibility === "password") {
+      document.getElementById("inFolderPwd").value = folder.password || "";
+    }
+    document.getElementById("folderManageZone").style.display = "";
+    const parentVis = getInheritConstraint(folder.parentId);
+    if (parentVis) applyVisConstraint(parentVis);
+  } else {
+    document.getElementById("folderTitle").textContent = "新建文件夹";
+    const parentId = currentFolderId || null;
+    const parentVis = getInheritConstraint(parentId);
+    if (parentVis) {
+      applyVisConstraint(parentVis);
+      const parent = data.spaces[currentSpace].folders.find(f => f.id === parentId);
+      const info = document.getElementById("folderParentInfo");
+      info.style.display = "";
+      info.innerHTML = `📁 父文件夹：<b>${esc(parent.name)}</b>（${VIS_LABEL[parentVis].text}）<br>子文件夹不能比它更开放`;
+      setVis(parentVis);
+    }
+  }
+  openModal("folderModal");
+}
+function applyVisConstraint(parentVis) {
+  document.querySelectorAll("#visOptions .vis-opt").forEach(el => {
+    const v = el.dataset.vis;
+    el.classList.toggle("disabled", !isVisAllowed(v, parentVis));
+  });
+}
+function setVis(v) {
+  pendingVis = v;
+  document.querySelectorAll("#visOptions .vis-opt").forEach(el => {
+    el.classList.toggle("active", el.dataset.vis === v);
+  });
+  document.getElementById("pwdWrap").style.display = (v === "password") ? "" : "none";
+}
+document.querySelectorAll("#visOptions .vis-opt").forEach(el => {
+  el.onclick = () => setVis(el.dataset.vis);
+});
+document.getElementById("saveFolder").onclick = () => {
+  const name = document.getElementById("inFolderName").value.trim();
+  if (!name) return alert("请填写文件夹名称");
+  let pwd = "";
+  if (pendingVis === "password") {
+    pwd = document.getElementById("inFolderPwd").value.trim();
+    if (!pwd) return alert("密码文件夹需要设置密码");
+  }
+  const spaceData = data.spaces[currentSpace];
+  if (editingFolderId === null) {
+    const parentId = currentFolderId || null;
+    const parentVis = getInheritConstraint(parentId);
+    if (parentVis && !isVisAllowed(pendingVis, parentVis)) return alert(`子文件夹不能比父文件夹更开放`);
+    spaceData.folders.push({
+      id: Date.now(), name, visibility: pendingVis, password: pwd,
+      creator: currentUser, parentId: parentId,
+      time: Date.now(), deleted: false, history: []
+    });
+  } else {
+    const folder = spaceData.folders.find(f => f.id === editingFolderId);
+    const parentVis = getInheritConstraint(folder.parentId);
+    if (parentVis && !isVisAllowed(pendingVis, parentVis)) return alert(`子文件夹不能比父文件夹更开放`);
+    folder.name = name; folder.visibility = pendingVis; folder.password = pwd;
+  }
+  save(); closeModal("folderModal"); render();
+};
+function askDeleteFolder() {
+  const folder = data.spaces[currentSpace].folders.find(f => f.id === editingFolderId);
+  if (!folder) return;
+  const subCount = data.spaces[currentSpace].folders.filter(f => !f.deleted && f.parentId === folder.id).length;
+  const fileCount = data.spaces[currentSpace].files.filter(f => !f.deleted && f.folderId === folder.id).length;
+  document.getElementById("delFolderMsg").textContent =
+    `文件夹「${folder.name}」里有 ${subCount} 个子文件夹、${fileCount} 个文件。`;
+  closeModal("folderModal");
+  openModal("delFolderModal");
+}
+document.getElementById("delWithFiles").onclick = () => {
+  const spaceData = data.spaces[currentSpace];
+  const folder = spaceData.folders.find(f => f.id === editingFolderId);
+  if (!folder) return;
+  const toDeleteFolders = new Set();
+  const collect = (fid) => {
+    toDeleteFolders.add(fid);
+    spaceData.folders.forEach(f => { if (f.parentId === fid && !f.deleted) collect(f.id); });
+  };
+  collect(folder.id);
+  const backup = { folders: [], files: [] };
+  toDeleteFolders.forEach(fid => {
+    const fo = spaceData.folders.find(f => f.id === fid);
+    if (fo) { backup.folders.push({ ...fo }); fo.deleted = true; }
+    spaceData.files.forEach(f => {
+      if (f.folderId === fid && !f.deleted) { backup.files.push({ ...f }); f.deleted = true; }
+    });
+  });
+  save();
+  closeModal("delFolderModal");
+  if (toDeleteFolders.has(currentFolderId)) currentFolderId = null;
+  showUndoToast(`已删除「${folder.name}」`, () => {
+    backup.folders.forEach(bf => {
+      const target = spaceData.folders.find(f => f.id === bf.id);
+      if (target) Object.assign(target, bf); else spaceData.folders.push(bf);
+    });
+    backup.files.forEach(bf => {
+      const target = spaceData.files.find(f => f.id === bf.id);
+      if (target) Object.assign(target, bf); else spaceData.files.push(bf);
+    });
+    save(); render();
+  });
+  render();
+};
+document.getElementById("delMoveOut").onclick = () => {
+  const spaceData = data.spaces[currentSpace];
+  const folder = spaceData.folders.find(f => f.id === editingFolderId);
+  if (!folder) return;
+  const newParent = folder.parentId || null;
+  const movedFolders = [], movedFiles = [];
+  spaceData.folders.forEach(f => {
+    if (f.parentId === folder.id && !f.deleted) {
+      movedFolders.push({ id: f.id, oldParent: f.parentId });
+      f.parentId = newParent;
+    }
+  });
+  spaceData.files.forEach(f => {
+    if (f.folderId === folder.id && !f.deleted) {
+      movedFiles.push({ id: f.id, oldFolder: f.folderId });
+      f.folderId = newParent;
+    }
+  });
+  const backup = { ...folder };
+  folder.deleted = true;
+  save();
+  closeModal("delFolderModal");
+  if (currentFolderId === folder.id) currentFolderId = folder.parentId || null;
+  showUndoToast(`已删除「${folder.name}」`, () => {
+    const target = spaceData.folders.find(f => f.id === backup.id);
+    if (target) Object.assign(target, backup); else spaceData.folders.push(backup);
+    movedFolders.forEach(m => {
+      const f = spaceData.folders.find(x => x.id === m.id);
+      if (f) f.parentId = m.oldParent;
+    });
+    movedFiles.forEach(m => {
+      const f = spaceData.files.find(x => x.id === m.id);
+      if (f) f.folderId = m.oldFolder;
+    });
+    save(); render();
+  });
+  render();
+};
+
+// 初始化：先拉云端数据，再渲染
+(async () => {
+  // 显示加载中
+  const appEl = document.getElementById("app");
+  if (appEl) appEl.innerHTML = '<div style="text-align:center;padding:80px 0;font-size:15px;opacity:.7;letter-spacing:2px">云端加载中…</div>';
+
+  // 拉云端
+  const cloudData = await loadFromCloud();
+
+  if (cloudData && cloudData.accounts && cloudData.spaces) {
+    // 云端有数据 → 用云端
+    data = migrateData(cloudData);
+  } else {
+    // 云端空 → 检查本地是否有数据
+    const localRaw = localStorage.getItem(DATA_KEY);
+    if (localRaw) {
+      try {
+        const localData = JSON.parse(localRaw);
+        if (localData && localData.accounts && localData.spaces) {
+          // 问用户要不要上传
+          if (confirm("检测到本地有数据，是否上传到云端？\n\n（上传后云端会覆盖为空，本地内容会变成云端的初始内容）")) {
+            data = migrateData(localData);
+            saveToCloud(data);
+          } else {
+            // 用户不上传 → 用默认数据
+            data = defaultData();
+            saveToCloud(data);
+          }
+        } else {
+          data = defaultData();
+          saveToCloud(data);
+        }
+      } catch (e) {
+        data = defaultData();
+        saveToCloud(data);
+      }
+    } else {
+      // 本地也没有 → 用默认数据，传云端
+      data = defaultData();
+      saveToCloud(data);
+    }
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
