@@ -1094,36 +1094,25 @@ const CLOUD_KEY = "main";
 let dataLoaded = false;
 
 // 从云端拉数据
+let cloudLoadFailed = false;
 async function loadFromCloud() {
   try {
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error("超时")), 8000)
     );
-    const queryPromise = fetch(
-      SUPABASE_URL + "/rest/v1/kv_store?key=eq." + CLOUD_KEY + "&select=value",
-      {
-        headers: {
-          "apikey": SUPABASE_KEY,
-          "Authorization": "Bearer " + SUPABASE_KEY
-        },
-        cache: "no-store"
-      }
-    ).then(r => r.json()).then(rows => {
-      if (rows && rows.length > 0) return { data: rows[0], error: null };
-      return { data: null, error: null };
-    });
-
-    const result = await Promise.race([queryPromise, timeoutPromise]);
-    if (result.error) throw result.error;
-    if (result.data && result.data.value) {
-      dataLoaded = true;
-      return result.data.value;
-    } else {
-      dataLoaded = true;
-      return null;
-    }
+    const queryPromise = supabaseClient
+      .from("kv_store")
+      .select("value")
+      .eq("key", CLOUD_KEY)
+      .maybeSingle();
+    const { data: rows, error } = await Promise.race([queryPromise, timeoutPromise]);
+    if (error) throw error;
+    dataLoaded = true;
+    if (rows && rows.value) return rows.value;
+    return null;
   } catch (e) {
     console.error("加载云端失败：", e);
+    cloudLoadFailed = true;
     dataLoaded = true;
     return null;
   }
@@ -3430,6 +3419,12 @@ document.getElementById("delMoveOut").onclick = () => {
 
   // 拉云端
   const cloudData = await loadFromCloud();
+// 加载失败 → 不覆盖云端，提示用户
+if (cloudLoadFailed && !cloudData) {
+  const appEl = document.getElementById("app");
+  if (appEl) appEl.innerHTML = '<div style="text-align:center;padding:80px 0;font-size:15px;opacity:.7;letter-spacing:2px">云端加载失败，请刷新重试</div>';
+  return;
+}
 
   if (cloudData && cloudData.accounts && cloudData.spaces) {
     // 云端有数据 → 用云端
